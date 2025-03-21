@@ -35,15 +35,6 @@ else
   NEON := c
 endif
 
-sharpyuv_srcs := \
-    sharpyuv/sharpyuv.c \
-    sharpyuv/sharpyuv_cpu.c \
-    sharpyuv/sharpyuv_csp.c \
-    sharpyuv/sharpyuv_dsp.c \
-    sharpyuv/sharpyuv_gamma.c \
-    sharpyuv/sharpyuv_neon.$(NEON) \
-    sharpyuv/sharpyuv_sse2.c \
-
 dec_srcs := \
     src/dec/alpha_dec.c \
     src/dec/buffer_dec.c \
@@ -106,18 +97,6 @@ dsp_dec_srcs := \
     src/dsp/yuv_sse41.c \
 
 dsp_enc_srcs := \
-    src/dsp/cost.c \
-    src/dsp/cost_mips32.c \
-    src/dsp/cost_mips_dsp_r2.c \
-    src/dsp/cost_neon.$(NEON) \
-    src/dsp/cost_sse2.c \
-    src/dsp/enc.c \
-    src/dsp/enc_mips32.c \
-    src/dsp/enc_mips_dsp_r2.c \
-    src/dsp/enc_msa.c \
-    src/dsp/enc_neon.$(NEON) \
-    src/dsp/enc_sse2.c \
-    src/dsp/enc_sse41.c \
     src/dsp/lossless_enc.c \
     src/dsp/lossless_enc_mips32.c \
     src/dsp/lossless_enc_mips_dsp_r2.c \
@@ -129,16 +108,10 @@ dsp_enc_srcs := \
     src/dsp/ssim_sse2.c \
 
 enc_srcs := \
-    src/enc/alpha_enc.c \
-    src/enc/analysis_enc.c \
     src/enc/backward_references_cost_enc.c \
     src/enc/backward_references_enc.c \
     src/enc/config_enc.c \
-    src/enc/cost_enc.c \
-    src/enc/filter_enc.c \
-    src/enc/frame_enc.c \
     src/enc/histogram_enc.c \
-    src/enc/iterator_enc.c \
     src/enc/near_lossless_enc.c \
     src/enc/picture_enc.c \
     src/enc/picture_csp_enc.c \
@@ -146,10 +119,6 @@ enc_srcs := \
     src/enc/picture_rescale_enc.c \
     src/enc/picture_tools_enc.c \
     src/enc/predictor_enc.c \
-    src/enc/quant_enc.c \
-    src/enc/syntax_enc.c \
-    src/enc/token_enc.c \
-    src/enc/tree_enc.c \
     src/enc/vp8l_enc.c \
     src/enc/webp_enc.c \
 
@@ -174,7 +143,6 @@ utils_dec_srcs := \
 utils_enc_srcs := \
     src/utils/bit_writer_utils.c \
     src/utils/huffman_encode_utils.c \
-    src/utils/quant_levels_utils.c \
 
 ################################################################################
 # libwebpdecoder
@@ -216,7 +184,6 @@ endif  # ENABLE_SHARED=1
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-    $(sharpyuv_srcs) \
     $(dsp_enc_srcs) \
     $(enc_srcs) \
     $(utils_enc_srcs) \

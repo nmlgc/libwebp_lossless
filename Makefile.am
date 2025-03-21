@@ -1,5 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = sharpyuv src imageio man
+SUBDIRS = src imageio man
 EXTRA_DIST = COPYING autogen.sh
 
 if BUILD_EXTRAS

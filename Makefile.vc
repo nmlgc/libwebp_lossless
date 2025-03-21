@@ -5,7 +5,6 @@ LIBWEBPDECODER_BASENAME = libwebpdecoder
 LIBWEBP_BASENAME = libwebp
 LIBWEBPMUX_BASENAME = libwebpmux
 LIBWEBPDEMUX_BASENAME = libwebpdemux
-LIBSHARPYUV_BASENAME = libsharpyuv
 
 !IFNDEF ARCH
 !IF ! [ cl 2>&1 | find "x86" > NUL ]
@@ -84,7 +83,6 @@ OUTPUT_DIRS = $(DIRBIN) $(DIRINC) $(DIRLIB) \
               $(DIROBJ)\extras \
               $(DIROBJ)\imageio \
               $(DIROBJ)\mux \
-              $(DIROBJ)\sharpyuv \
               $(DIROBJ)\utils \
 
 # Target configuration
@@ -99,7 +97,6 @@ LIBWEBPDECODER_BASENAME = $(LIBWEBPDECODER_BASENAME)_debug
 LIBWEBP_BASENAME = $(LIBWEBP_BASENAME)_debug
 LIBWEBPMUX_BASENAME = $(LIBWEBPMUX_BASENAME)_debug
 LIBWEBPDEMUX_BASENAME = $(LIBWEBPDEMUX_BASENAME)_debug
-LIBSHARPYUV_BASENAME = $(LIBSHARPYUV_BASENAME)_debug
 !ELSE IF "$(CFG)" == "release-dynamic"
 CC        = $(CCNODBG)
 RC        = $(RCNODBG)
@@ -113,7 +110,6 @@ LIBWEBPDECODER_BASENAME = $(LIBWEBPDECODER_BASENAME)_debug
 LIBWEBP_BASENAME = $(LIBWEBP_BASENAME)_debug
 LIBWEBPMUX_BASENAME = $(LIBWEBPMUX_BASENAME)_debug
 LIBWEBPDEMUX_BASENAME = $(LIBWEBPDEMUX_BASENAME)_debug
-LIBSHARPYUV_BASENAME = $(LIBSHARPYUV_BASENAME)_debug
 !ENDIF
 
 !IF "$(STATICLIBBUILD)" == "TRUE"
@@ -123,14 +119,12 @@ LIBWEBPDECODER = $(DIRLIB)\$(LIBWEBPDECODER_BASENAME).lib
 LIBWEBP = $(DIRLIB)\$(LIBWEBP_BASENAME).lib
 LIBWEBPMUX = $(DIRLIB)\$(LIBWEBPMUX_BASENAME).lib
 LIBWEBPDEMUX = $(DIRLIB)\$(LIBWEBPDEMUX_BASENAME).lib
-LIBSHARPYUV = $(DIRLIB)\$(LIBSHARPYUV_BASENAME).lib
 !ELSE IF "$(DLLBUILD)" == "TRUE"
 CC     = $(CC) /I$(DIROBJ) $(RTLIB) /DWEBP_DLL
 LIBWEBPDECODER = $(DIRLIB)\$(LIBWEBPDECODER_BASENAME)_dll.lib
 LIBWEBP = $(DIRLIB)\$(LIBWEBP_BASENAME)_dll.lib
 LIBWEBPMUX = $(DIRLIB)\$(LIBWEBPMUX_BASENAME)_dll.lib
 LIBWEBPDEMUX = $(DIRLIB)\$(LIBWEBPDEMUX_BASENAME)_dll.lib
-LIBSHARPYUV = $(DIRLIB)\$(LIBSHARPYUV_BASENAME)_dll.lib
 LIBWEBP_PDBNAME = $(DIROBJ)\$(LIBWEBP_BASENAME)_dll.pdb
 CFGSET = TRUE
 !ENDIF
@@ -179,15 +173,6 @@ CFLAGS = $(CFLAGS) /D_UNICODE /DUNICODE
 !IF "$(CFGSET)" == "TRUE"
 # A config was provided, so the library can be built.
 #
-
-SHARPYUV_OBJS = \
-    $(DIROBJ)\sharpyuv\sharpyuv.obj \
-    $(DIROBJ)\sharpyuv\sharpyuv_cpu.obj \
-    $(DIROBJ)\sharpyuv\sharpyuv_csp.obj \
-    $(DIROBJ)\sharpyuv\sharpyuv_dsp.obj \
-    $(DIROBJ)\sharpyuv\sharpyuv_gamma.obj \
-    $(DIROBJ)\sharpyuv\sharpyuv_neon.obj \
-    $(DIROBJ)\sharpyuv\sharpyuv_sse2.obj \
 
 DEC_OBJS = \
     $(DIROBJ)\dec\alpha_dec.obj \
@@ -252,18 +237,6 @@ DSP_DEC_OBJS = \
     $(DIROBJ)\dsp\yuv_sse41.obj \
 
 DSP_ENC_OBJS = \
-    $(DIROBJ)\dsp\cost.obj \
-    $(DIROBJ)\dsp\cost_mips32.obj \
-    $(DIROBJ)\dsp\cost_mips_dsp_r2.obj \
-    $(DIROBJ)\dsp\cost_neon.obj \
-    $(DIROBJ)\dsp\cost_sse2.obj \
-    $(DIROBJ)\dsp\enc.obj \
-    $(DIROBJ)\dsp\enc_mips32.obj \
-    $(DIROBJ)\dsp\enc_mips_dsp_r2.obj \
-    $(DIROBJ)\dsp\enc_msa.obj \
-    $(DIROBJ)\dsp\enc_neon.obj \
-    $(DIROBJ)\dsp\enc_sse2.obj \
-    $(DIROBJ)\dsp\enc_sse41.obj \
     $(DIROBJ)\dsp\lossless_enc.obj \
     $(DIROBJ)\dsp\lossless_enc_mips32.obj \
     $(DIROBJ)\dsp\lossless_enc_mips_dsp_r2.obj \
@@ -298,16 +271,10 @@ EX_UTIL_OBJS = \
     $(DIROBJ)\examples\example_util.obj \
 
 ENC_OBJS = \
-    $(DIROBJ)\enc\alpha_enc.obj \
-    $(DIROBJ)\enc\analysis_enc.obj \
     $(DIROBJ)\enc\backward_references_cost_enc.obj \
     $(DIROBJ)\enc\backward_references_enc.obj \
     $(DIROBJ)\enc\config_enc.obj \
-    $(DIROBJ)\enc\cost_enc.obj \
-    $(DIROBJ)\enc\filter_enc.obj \
-    $(DIROBJ)\enc\frame_enc.obj \
     $(DIROBJ)\enc\histogram_enc.obj \
-    $(DIROBJ)\enc\iterator_enc.obj \
     $(DIROBJ)\enc\near_lossless_enc.obj \
     $(DIROBJ)\enc\picture_enc.obj \
     $(DIROBJ)\enc\picture_csp_enc.obj \
@@ -315,17 +282,12 @@ ENC_OBJS = \
     $(DIROBJ)\enc\picture_rescale_enc.obj \
     $(DIROBJ)\enc\picture_tools_enc.obj \
     $(DIROBJ)\enc\predictor_enc.obj \
-    $(DIROBJ)\enc\quant_enc.obj \
-    $(DIROBJ)\enc\syntax_enc.obj \
-    $(DIROBJ)\enc\token_enc.obj \
-    $(DIROBJ)\enc\tree_enc.obj \
     $(DIROBJ)\enc\vp8l_enc.obj \
     $(DIROBJ)\enc\webp_enc.obj \
 
 EXTRAS_OBJS = \
     $(DIROBJ)\extras\extras.obj \
     $(DIROBJ)\extras\quality_estimate.obj \
-    $(DIROBJ)\extras\sharpyuv_risk_table.obj \
 
 IMAGEIO_UTIL_OBJS = \
     $(DIROBJ)\imageio\imageio_util.obj \
@@ -351,16 +313,14 @@ UTILS_DEC_OBJS = \
 UTILS_ENC_OBJS = \
     $(DIROBJ)\utils\bit_writer_utils.obj \
     $(DIROBJ)\utils\huffman_encode_utils.obj \
-    $(DIROBJ)\utils\quant_levels_utils.obj \
 
 LIBWEBPDECODER_OBJS = $(DEC_OBJS) $(DSP_DEC_OBJS) $(UTILS_DEC_OBJS)
 LIBWEBP_OBJS = $(LIBWEBPDECODER_OBJS) $(ENC_OBJS) \
                $(DSP_ENC_OBJS) $(UTILS_ENC_OBJS) $(DLL_OBJS)
 LIBWEBPMUX_OBJS = $(MUX_OBJS) $(LIBWEBPMUX_OBJS)
 LIBWEBPDEMUX_OBJS = $(DEMUX_OBJS) $(LIBWEBPDEMUX_OBJS)
-LIBSHARPYUV_OBJS = $(SHARPYUV_OBJS)
 
-OUT_LIBS = $(LIBWEBPDECODER) $(LIBWEBP) $(LIBSHARPYUV)
+OUT_LIBS = $(LIBWEBPDECODER) $(LIBWEBP)
 !IF "$(ARCH)" == "ARM"
 ex: $(OUT_LIBS)
 all: ex
@@ -388,14 +348,14 @@ $(DIRBIN)\anim_dump.exe: $(EX_GIF_DEC_OBJS) $(LIBWEBPDEMUX) $(LIBWEBP)
 $(DIRBIN)\anim_dump.exe: $(IMAGEIO_ENC_OBJS)
 $(DIRBIN)\cwebp.exe: $(DIROBJ)\examples\cwebp.obj $(IMAGEIO_DEC_OBJS)
 $(DIRBIN)\cwebp.exe: $(IMAGEIO_UTIL_OBJS)
-$(DIRBIN)\cwebp.exe: $(LIBWEBPDEMUX) $(LIBSHARPYUV)
+$(DIRBIN)\cwebp.exe: $(LIBWEBPDEMUX)
 $(DIRBIN)\dwebp.exe: $(DIROBJ)\examples\dwebp.obj $(IMAGEIO_DEC_OBJS)
 $(DIRBIN)\dwebp.exe: $(IMAGEIO_ENC_OBJS)
 $(DIRBIN)\dwebp.exe: $(IMAGEIO_UTIL_OBJS)
 $(DIRBIN)\dwebp.exe: $(LIBWEBPDEMUX)
 $(DIRBIN)\gif2webp.exe: $(DIROBJ)\examples\gif2webp.obj $(EX_GIF_DEC_OBJS)
 $(DIRBIN)\gif2webp.exe: $(EX_UTIL_OBJS) $(IMAGEIO_UTIL_OBJS) $(LIBWEBPMUX)
-$(DIRBIN)\gif2webp.exe: $(LIBWEBP) $(LIBSHARPYUV)
+$(DIRBIN)\gif2webp.exe: $(LIBWEBP)
 $(DIRBIN)\vwebp.exe: $(DIROBJ)\examples\vwebp.obj $(EX_UTIL_OBJS)
 $(DIRBIN)\vwebp.exe: $(IMAGEIO_UTIL_OBJS) $(LIBWEBPDEMUX) $(LIBWEBP)
 $(DIRBIN)\vwebp_sdl.exe: $(DIROBJ)\extras\vwebp_sdl.obj
@@ -406,7 +366,7 @@ $(DIRBIN)\webpmux.exe: $(EX_UTIL_OBJS) $(IMAGEIO_UTIL_OBJS) $(LIBWEBP)
 $(DIRBIN)\img2webp.exe: $(DIROBJ)\examples\img2webp.obj $(LIBWEBPMUX)
 $(DIRBIN)\img2webp.exe: $(IMAGEIO_DEC_OBJS)
 $(DIRBIN)\img2webp.exe: $(EX_UTIL_OBJS) $(IMAGEIO_UTIL_OBJS)
-$(DIRBIN)\img2webp.exe: $(LIBWEBPDEMUX) $(LIBWEBP) $(LIBSHARPYUV)
+$(DIRBIN)\img2webp.exe: $(LIBWEBPDEMUX) $(LIBWEBP)
 $(DIRBIN)\get_disto.exe: $(DIROBJ)\extras\get_disto.obj
 $(DIRBIN)\get_disto.exe: $(IMAGEIO_DEC_OBJS) $(IMAGEIO_UTIL_OBJS)
 $(DIRBIN)\get_disto.exe: $(LIBWEBPDEMUX) $(LIBWEBP)
@@ -429,13 +389,12 @@ $(EX_UTIL_OBJS) $(IMAGEIO_UTIL_OBJS): $(OUTPUT_DIRS)
 $(IMAGEIO_DEC_OBJS) $(IMAGEIO_ENC_OBJS) $(EXTRAS_OBJS): $(OUTPUT_DIRS)
 !ENDIF  # ARCH == ARM
 
-$(LIBSHARPYUV): $(LIBSHARPYUV_OBJS)
 $(LIBWEBPDECODER): $(LIBWEBPDECODER_OBJS)
-$(LIBWEBP): $(LIBWEBP_OBJS) $(LIBSHARPYUV)
+$(LIBWEBP): $(LIBWEBP_OBJS)
 $(LIBWEBPMUX): $(LIBWEBPMUX_OBJS)
 $(LIBWEBPDEMUX): $(LIBWEBPDEMUX_OBJS)
 
-$(LIBWEBP_OBJS) $(LIBWEBPMUX_OBJS) $(LIBWEBPDEMUX_OBJS) $(LIBSHARPYUV_OBJS): \
+$(LIBWEBP_OBJS) $(LIBWEBPMUX_OBJS) $(LIBWEBPDEMUX_OBJS): \
     $(OUTPUT_DIRS)
 
 !IF "$(DLLBUILD)" == "TRUE"
@@ -448,20 +407,17 @@ $(LIBWEBP_OBJS) $(LIBWEBPMUX_OBJS) $(LIBWEBPDEMUX_OBJS) $(LIBSHARPYUV_OBJS): \
 	$(RC) /fo$@ $<
 {src\mux}.rc{$(DIROBJ)\mux}.res:
 	$(RC) /fo$@ $<
-{sharpyuv}.rc{$(DIROBJ)\sharpyuv}.res:
-	$(RC) /fo$@ $<
 
-$(LIBSHARPYUV): $(DIROBJ)\sharpyuv\$(LIBSHARPYUV_BASENAME:_debug=).res
-$(LIBWEBP): $(LIBSHARPYUV) $(DIROBJ)\$(LIBWEBP_BASENAME:_debug=).res
+$(LIBWEBP): $(DIROBJ)\$(LIBWEBP_BASENAME:_debug=).res
 $(LIBWEBPDECODER): $(DIROBJ)\$(LIBWEBPDECODER_BASENAME:_debug=).res
 $(LIBWEBPMUX): $(LIBWEBP) $(DIROBJ)\mux\$(LIBWEBPMUX_BASENAME:_debug=).res
 $(LIBWEBPDEMUX): $(LIBWEBP) $(DIROBJ)\demux\$(LIBWEBPDEMUX_BASENAME:_debug=).res
 
-$(LIBWEBPDECODER) $(LIBWEBP) $(LIBWEBPMUX) $(LIBWEBPDEMUX) $(LIBSHARPYUV):
+$(LIBWEBPDECODER) $(LIBWEBP) $(LIBWEBPMUX) $(LIBWEBPDEMUX):
 	$(LNKDLL) /out:$(DIRBIN)\$(@B:_dll=.dll) /implib:$@ $(LFLAGS) $**
 	-xcopy $(DIROBJ)\*.pdb $(DIRLIB) /y
 !ELSE
-$(LIBWEBPDECODER) $(LIBWEBP) $(LIBWEBPMUX) $(LIBWEBPDEMUX) $(LIBSHARPYUV):
+$(LIBWEBPDECODER) $(LIBWEBP) $(LIBWEBPMUX) $(LIBWEBPDEMUX):
 	$(LNKLIB) /out:$@ $**
 	-xcopy $(DIROBJ)\*.pdb $(DIRLIB) /y
 !ENDIF
@@ -494,8 +450,6 @@ $(DIROBJ)\examples\gifdec.obj: examples\gifdec.c
 	$(CC) $(CFLAGS) /Fd$(DIROBJ)\extras\ /Fo$(DIROBJ)\extras\ $<
 {imageio}.c{$(DIROBJ)\imageio}.obj::
 	$(CC) $(CFLAGS) /Fd$(DIROBJ)\imageio\ /Fo$(DIROBJ)\imageio\ $<
-{sharpyuv}.c{$(DIROBJ)\sharpyuv}.obj::
-	$(CC) $(CFLAGS) /Fd$(DIROBJ)\sharpyuv\ /Fo$(DIROBJ)\sharpyuv\ $<
 {src\dec}.c{$(DIROBJ)\dec}.obj::
 	$(CC) $(CFLAGS) /Fd$(LIBWEBP_PDBNAME) /Fo$(DIROBJ)\dec\ $<
 {src\demux}.c{$(DIROBJ)\demux}.obj::

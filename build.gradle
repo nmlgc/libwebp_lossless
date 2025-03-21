@@ -105,14 +105,6 @@ model {
       sources {
         c {
           source {
-            srcDir "sharpyuv"
-            include "sharpyuv.c"
-            include "sharpyuv_cpu.c"
-            include "sharpyuv_csp.c"
-            include "sharpyuv_dsp.c"
-            include "sharpyuv_gamma.c"
-            include "sharpyuv_neon.c"
-            include "sharpyuv_sse2.c"
             srcDir "src/dec"
             include "alpha_dec.c"
             include "buffer_dec.c"
@@ -180,18 +172,6 @@ model {
             include "thread_utils.c"
             include "utils.c"
             srcDir "src/dsp"
-            include "cost.c"
-            include "cost_mips32.c"
-            include "cost_mips_dsp_r2.c"
-            include "cost_neon.$NEON"
-            include "cost_sse2.c"
-            include "enc.c"
-            include "enc_mips32.c"
-            include "enc_mips_dsp_r2.c"
-            include "enc_msa.c"
-            include "enc_neon.$NEON"
-            include "enc_sse2.c"
-            include "enc_sse41.c"
             include "lossless_enc.c"
             include "lossless_enc_mips32.c"
             include "lossless_enc_mips_dsp_r2.c"
@@ -203,15 +183,11 @@ model {
             include "ssim_sse2.c"
             srcDir "src/enc"
             include "alpha_enc.c"
-            include "analysis_enc.c"
             include "backward_references_cost_enc.c"
             include "backward_references_enc.c"
             include "config_enc.c"
-            include "cost_enc.c"
-            include "filter_enc.c"
             include "frame_enc.c"
             include "histogram_enc.c"
-            include "iterator_enc.c"
             include "near_lossless_enc.c"
             include "picture_enc.c"
             include "picture_csp_enc.c"
@@ -228,7 +204,6 @@ model {
             srcDir "src/utils"
             include "bit_writer_utils.c"
             include "huffman_encode_utils.c"
-            include "quant_levels_utils.c"
           }
           exportedHeaders {
             srcDir "src"
@@ -351,27 +326,6 @@ model {
           source {
             srcDir "./examples"
             include "cwebp.c"
-          }
-        }
-      }
-    }
-
-    dwebp(NativeExecutableSpec) {
-      binaries {
-        all {
-          lib library: "example_util", linkage: "static"
-          lib library: "imagedec", linkage: "static"
-          lib library: "imageenc", linkage: "static"
-          lib library: "imageio_util", linkage: "static"
-          lib library: "webpdemux", linkage: "static"
-          lib library: "webp"
-        }
-      }
-      sources {
-        c {
-          source {
-              srcDir "./examples"
-              include "dwebp.c"
           }
         }
       }

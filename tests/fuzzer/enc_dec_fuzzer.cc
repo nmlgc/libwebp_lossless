@@ -52,10 +52,6 @@ void EncDecTest(bool use_argb, int source_image_index, WebPConfig config,
         config.quality = 99.0f;
         config.method = 5;
       }
-    } else {
-      if (config.quality > 99.0f && config.method == 6) {
-        config.quality = 99.0f;
-      }
     }
     if (config.alpha_quality == 100 && config.method == 6) {
       config.alpha_quality = 99;

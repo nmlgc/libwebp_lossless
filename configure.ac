@@ -28,8 +28,7 @@ AC_ARG_ENABLE([everything],
               AS_HELP_STRING([--enable-everything],
                              [Enable all optional targets. These can still be
                               disabled with --disable-target]),
-              [SET_IF_UNSET([enable_libsharpyuv], [$enableval])
-               SET_IF_UNSET([enable_libwebpdecoder], [$enableval])
+              [SET_IF_UNSET([enable_libwebpdecoder], [$enableval])
                SET_IF_UNSET([enable_libwebpdemux], [$enableval])
                SET_IF_UNSET([enable_libwebpextras], [$enableval])
                SET_IF_UNSET([enable_libwebpmux], [$enableval])])
@@ -775,7 +774,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([src/webp/config.h])
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile \
                  examples/Makefile extras/Makefile imageio/Makefile \
-                 sharpyuv/Makefile sharpyuv/libsharpyuv.pc \
                  src/dec/Makefile src/enc/Makefile src/dsp/Makefile \
                  src/demux/Makefile src/mux/Makefile \
                  src/utils/Makefile \

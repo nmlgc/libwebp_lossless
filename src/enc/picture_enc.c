@@ -277,13 +277,6 @@ size_t NAME(const uint8_t* in, int w, int h, int bps, float q,          \
   return Encode(in, w, h, bps, IMPORTER, q, 0, out);                    \
 }
 
-ENCODE_FUNC(WebPEncodeRGB, WebPPictureImportRGB)
-ENCODE_FUNC(WebPEncodeRGBA, WebPPictureImportRGBA)
-#if !defined(WEBP_REDUCE_CSP)
-ENCODE_FUNC(WebPEncodeBGR, WebPPictureImportBGR)
-ENCODE_FUNC(WebPEncodeBGRA, WebPPictureImportBGRA)
-#endif  // WEBP_REDUCE_CSP
-
 #undef ENCODE_FUNC
 
 #define LOSSLESS_DEFAULT_QUALITY 70.

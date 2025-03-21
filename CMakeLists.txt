@@ -86,8 +86,6 @@ if(WEBP_BUILD_WEBP_JS)
   endif()
 endif()
 
-set(SHARPYUV_DEP_LIBRARIES)
-set(SHARPYUV_DEP_INCLUDE_DIRS)
 set(WEBP_DEP_LIBRARIES)
 set(WEBP_DEP_INCLUDE_DIRS)
 
@@ -183,11 +181,8 @@ if(ANDROID)
               ${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c)
   list(APPEND INSTALLED_LIBRARIES cpufeatures-webp)
   target_link_libraries(cpufeatures-webp dl)
-  set(SHARPYUV_DEP_LIBRARIES ${SHARPYUV_DEP_LIBRARIES} cpufeatures-webp)
   set(WEBP_DEP_LIBRARIES ${WEBP_DEP_LIBRARIES} cpufeatures-webp)
   set(cpufeatures_include_dir ${ANDROID_NDK}/sources/android/cpufeatures)
-  set(SHARPYUV_DEP_INCLUDE_DIRS ${SHARPYUV_DEP_INCLUDE_DIRS}
-                                ${cpufeatures_include_dir})
   set(WEBP_DEP_INCLUDE_DIRS ${WEBP_DEP_INCLUDE_DIRS} ${cpufeatures_include_dir})
   add_definitions(-DHAVE_CPU_FEATURES_H=1)
   set(HAVE_CPU_FEATURES_H 1)
@@ -324,29 +319,6 @@ function(libwebp_add_stub_file TARGET)
   target_sources(${TARGET} PRIVATE ${stub_source_file})
 endfunction()
 
-parse_makefile_am(${CMAKE_CURRENT_SOURCE_DIR}/sharpyuv "WEBP_SHARPYUV_SRCS" "")
-add_library(sharpyuv ${WEBP_SHARPYUV_SRCS})
-target_link_libraries(sharpyuv ${SHARPYUV_DEP_LIBRARIES})
-set_version(sharpyuv/Makefile.am sharpyuv sharpyuv)
-target_include_directories(
-  sharpyuv PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
-                   ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set_target_properties(
-  sharpyuv
-  PROPERTIES PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/sharpyuv/sharpyuv.h;\
-${CMAKE_CURRENT_SOURCE_DIR}/sharpyuv/sharpyuv_csp.h")
-configure_pkg_config("sharpyuv/libsharpyuv.pc")
-install(
-  TARGETS sharpyuv
-  EXPORT ${PROJECT_NAME}Targets
-  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/webp/sharpyuv
-  INCLUDES
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  ${CMAKE_INSTALL_INCLUDEDIR}/webp
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
 if(MSVC)
   # avoid security warnings for e.g., fopen() used in the examples.
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -399,7 +371,6 @@ target_include_directories(webputils PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
                                              ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(webp $<TARGET_OBJECTS:webpdecode> $<TARGET_OBJECTS:webpdsp>
                  $<TARGET_OBJECTS:webpencode> $<TARGET_OBJECTS:webputils>)
-target_link_libraries(webp sharpyuv)
 if(XCODE)
   libwebp_add_stub_file(webp)
 endif()

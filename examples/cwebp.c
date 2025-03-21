@@ -27,7 +27,6 @@
 #include "../imageio/webpdec.h"
 #include "./stopwatch.h"
 #include "./unicode.h"
-#include "sharpyuv/sharpyuv.h"
 #include "webp/encode.h"
 
 #ifndef WEBP_DLL
@@ -135,35 +134,6 @@ static void AllocExtraInfo(WebPPicture* const pic) {
       (uint8_t*)WebPMalloc(mb_w * mb_h * sizeof(*pic->extra_info));
 }
 
-static void PrintByteCount(const int bytes[4], int total_size,
-                           int* const totals) {
-  int s;
-  int total = 0;
-  for (s = 0; s < 4; ++s) {
-    fprintf(stderr, "| %7d ", bytes[s]);
-    total += bytes[s];
-    if (totals) totals[s] += bytes[s];
-  }
-  fprintf(stderr, "| %7d  (%.1f%%)\n", total, 100.f * total / total_size);
-}
-
-static void PrintPercents(const int counts[4]) {
-  int s;
-  const int total = counts[0] + counts[1] + counts[2] + counts[3];
-  for (s = 0; s < 4; ++s) {
-    fprintf(stderr, "|     %3d%%", (int)(100. * counts[s] / total + .5));
-  }
-  fprintf(stderr, "| %7d\n", total);
-}
-
-static void PrintValues(const int values[4]) {
-  int s;
-  for (s = 0; s < 4; ++s) {
-    fprintf(stderr, "| %7d ", values[s]);
-  }
-  fprintf(stderr, "|\n");
-}
-
 static void PrintFullLosslessInfo(const WebPAuxStats* const stats,
                                   const char* const description) {
   fprintf(stderr, "Lossless-%s compressed size: %d bytes\n",
@@ -206,75 +176,6 @@ static void PrintExtraInfoLossless(const WebPPicture* const pic,
   }
 }
 
-static void PrintExtraInfoLossy(const WebPPicture* const pic, int short_output,
-                                int full_details,
-                                const char* const file_name) {
-  const WebPAuxStats* const stats = pic->stats;
-  if (short_output) {
-    fprintf(stderr, "%7d %2.2f\n", stats->coded_size, stats->PSNR[3]);
-  } else {
-    const int num_i4 = stats->block_count[0];
-    const int num_i16 = stats->block_count[1];
-    const int num_skip = stats->block_count[2];
-    const int total = num_i4 + num_i16;
-    WFPRINTF(stderr, "File:      %s\n", (const W_CHAR*)file_name);
-    fprintf(stderr, "Dimension: %d x %d%s\n",
-            pic->width, pic->height,
-            stats->alpha_data_size ? " (with alpha)" : "");
-    fprintf(stderr, "Output:    "
-            "%d bytes Y-U-V-All-PSNR %2.2f %2.2f %2.2f   %2.2f dB\n"
-            "           (%.2f bpp)\n",
-            stats->coded_size,
-            stats->PSNR[0], stats->PSNR[1], stats->PSNR[2], stats->PSNR[3],
-            8.f * stats->coded_size / pic->width / pic->height);
-    if (total > 0) {
-      int totals[4] = { 0, 0, 0, 0 };
-      fprintf(stderr, "block count:  intra4:     %6d  (%.2f%%)\n"
-                      "              intra16:    %6d  (%.2f%%)\n"
-                      "              skipped:    %6d  (%.2f%%)\n",
-              num_i4, 100.f * num_i4 / total,
-              num_i16, 100.f * num_i16 / total,
-              num_skip, 100.f * num_skip / total);
-      fprintf(stderr, "bytes used:  header:         %6d  (%.1f%%)\n"
-                      "             mode-partition: %6d  (%.1f%%)\n",
-              stats->header_bytes[0],
-              100.f * stats->header_bytes[0] / stats->coded_size,
-              stats->header_bytes[1],
-              100.f * stats->header_bytes[1] / stats->coded_size);
-      if (stats->alpha_data_size > 0) {
-        fprintf(stderr, "             transparency:   %6d (%.1f dB)\n",
-                stats->alpha_data_size, stats->PSNR[4]);
-      }
-      fprintf(stderr, " Residuals bytes  "
-                      "|segment 1|segment 2|segment 3"
-                      "|segment 4|  total\n");
-      if (full_details) {
-        fprintf(stderr, "  intra4-coeffs:  ");
-        PrintByteCount(stats->residual_bytes[0], stats->coded_size, totals);
-        fprintf(stderr, " intra16-coeffs:  ");
-        PrintByteCount(stats->residual_bytes[1], stats->coded_size, totals);
-        fprintf(stderr, "  chroma coeffs:  ");
-        PrintByteCount(stats->residual_bytes[2], stats->coded_size, totals);
-      }
-      fprintf(stderr, "    macroblocks:  ");
-      PrintPercents(stats->segment_size);
-      fprintf(stderr, "      quantizer:  ");
-      PrintValues(stats->segment_quant);
-      fprintf(stderr, "   filter level:  ");
-      PrintValues(stats->segment_level);
-      if (full_details) {
-        fprintf(stderr, "------------------+---------");
-        fprintf(stderr, "+---------+---------+---------+-----------------\n");
-        fprintf(stderr, " segments total:  ");
-        PrintByteCount(totals, stats->coded_size, NULL);
-      }
-    }
-    if (stats->lossless_size > 0) {
-      PrintFullLosslessInfo(stats, "alpha");
-    }
-  }
-}
-
 static void PrintMapInfo(const WebPPicture* const pic) {
   if (pic->extra_info != NULL) {
     const int mb_w = (pic->width + 15) / 16;
@@ -307,46 +208,6 @@ static int MyWriter(const uint8_t* data, size_t data_size,
                     const WebPPicture* const pic) {
   FILE* const out = (FILE*)pic->custom_ptr;
   return data_size ? (fwrite(data, data_size, 1, out) == 1) : 1;
-}
-
-// Dumps a picture as a PGM file using the IMC4 layout.
-static int DumpPicture(const WebPPicture* const picture, const char* PGM_name) {
-  int y;
-  int ok = 0;
-  const int uv_width = (picture->width + 1) / 2;
-  const int uv_height = (picture->height + 1) / 2;
-  const int stride = (picture->width + 1) & ~1;
-  const uint8_t* src_y = picture->y;
-  const uint8_t* src_u = picture->u;
-  const uint8_t* src_v = picture->v;
-  const uint8_t* src_a = picture->a;
-  const int alpha_height =
-      WebPPictureHasTransparency(picture) ? picture->height : 0;
-  const int height = picture->height + uv_height + alpha_height;
-  FILE* const f = WFOPEN(PGM_name, "wb");
-  if (f == NULL) return 0;
-  fprintf(f, "P5\n%d %d\n255\n", stride, height);
-  for (y = 0; y < picture->height; ++y) {
-    if (fwrite(src_y, picture->width, 1, f) != 1) goto Error;
-    if (picture->width & 1) fputc(0, f);  // pad
-    src_y += picture->y_stride;
-  }
-  for (y = 0; y < uv_height; ++y) {
-    if (fwrite(src_u, uv_width, 1, f) != 1) goto Error;
-    if (fwrite(src_v, uv_width, 1, f) != 1) goto Error;
-    src_u += picture->uv_stride;
-    src_v += picture->uv_stride;
-  }
-  for (y = 0; y < alpha_height; ++y) {
-    if (fwrite(src_a, picture->width, 1, f) != 1) goto Error;
-    if (picture->width & 1) fputc(0, f);  // pad
-    src_a += picture->a_stride;
-  }
-  ok = 1;
-
- Error:
-  fclose(f);
-  return ok;
 }
 
 // -----------------------------------------------------------------------------
@@ -843,12 +704,8 @@ int main(int argc, const char* argv[]) {
 #endif
     } else if (!strcmp(argv[c], "-version")) {
       const int version = WebPGetEncoderVersion();
-      const int sharpyuv_version = SharpYuvGetVersion();
       printf("%d.%d.%d\n",
              (version >> 16) & 0xff, (version >> 8) & 0xff, version & 0xff);
-      printf("libsharpyuv: %d.%d.%d\n",
-             (sharpyuv_version >> 24) & 0xff, (sharpyuv_version >> 16) & 0xffff,
-             sharpyuv_version & 0xff);
       FREE_WARGV_AND_RETURN(EXIT_SUCCESS);
     } else if (!strcmp(argv[c], "-progress")) {
       show_progress = 1;
@@ -1171,12 +1028,9 @@ int main(int argc, const char* argv[]) {
 
   // Write the YUV planes to a PGM file. Only available for lossy.
   if (dump_file) {
-    if (picture.use_argb) {
+    {
       fprintf(stderr, "Warning: can't dump file (-d option) "
                       "in lossless mode.\n");
-    } else if (!DumpPicture(&picture, dump_file)) {
-      WFPRINTF(stderr, "Warning, couldn't dump picture %s\n",
-               (const W_CHAR*)dump_file);
     }
   }
 
@@ -1211,8 +1065,6 @@ int main(int argc, const char* argv[]) {
     if (!short_output || print_distortion < 0) {
       if (config.lossless) {
         PrintExtraInfoLossless(&picture, short_output, in_file);
-      } else {
-        PrintExtraInfoLossy(&picture, short_output, config.low_memory, in_file);
       }
     }
     if (!short_output && picture.extra_info_type > 0) {

@@ -37,28 +37,6 @@ typedef struct WebPMemoryWriter WebPMemoryWriter;
 // each of major/minor/revision. E.g: v2.5.7 is 0x020507.
 WEBP_EXTERN int WebPGetEncoderVersion(void);
 
-//------------------------------------------------------------------------------
-// One-stop-shop call! No questions asked:
-
-// Returns the size of the compressed data (pointed to by *output), or 0 if
-// an error occurred. The compressed data must be released by the caller
-// using the call 'WebPFree(*output)'.
-// These functions compress using the lossy format, and the quality_factor
-// can go from 0 (smaller output, lower quality) to 100 (best quality,
-// larger output).
-WEBP_EXTERN size_t WebPEncodeRGB(const uint8_t* rgb,
-                                 int width, int height, int stride,
-                                 float quality_factor, uint8_t** output);
-WEBP_EXTERN size_t WebPEncodeBGR(const uint8_t* bgr,
-                                 int width, int height, int stride,
-                                 float quality_factor, uint8_t** output);
-WEBP_EXTERN size_t WebPEncodeRGBA(const uint8_t* rgba,
-                                  int width, int height, int stride,
-                                  float quality_factor, uint8_t** output);
-WEBP_EXTERN size_t WebPEncodeBGRA(const uint8_t* bgra,
-                                  int width, int height, int stride,
-                                  float quality_factor, uint8_t** output);
-
 // These functions are the equivalent of the above, but compressing in a
 // lossless manner. Files are usually larger than lossy format, but will
 // not suffer any compression loss.
@@ -485,31 +463,6 @@ WEBP_NODISCARD WEBP_EXTERN int WebPPictureImportBGRA(
 WEBP_NODISCARD WEBP_EXTERN int WebPPictureImportBGRX(
     WebPPicture* picture, const uint8_t* bgrx, int bgrx_stride);
 
-// Converts picture->argb data to the YUV420A format. The 'colorspace'
-// parameter is deprecated and should be equal to WEBP_YUV420.
-// Upon return, picture->use_argb is set to false. The presence of real
-// non-opaque transparent values is detected, and 'colorspace' will be
-// adjusted accordingly. Note that this method is lossy.
-// Returns false in case of error.
-WEBP_NODISCARD WEBP_EXTERN int WebPPictureARGBToYUVA(
-    WebPPicture* picture, WebPEncCSP /*colorspace = WEBP_YUV420*/);
-
-// Same as WebPPictureARGBToYUVA(), but the conversion is done using
-// pseudo-random dithering with a strength 'dithering' between
-// 0.0 (no dithering) and 1.0 (maximum dithering). This is useful
-// for photographic picture.
-WEBP_NODISCARD WEBP_EXTERN int WebPPictureARGBToYUVADithered(
-    WebPPicture* picture, WebPEncCSP colorspace, float dithering);
-
-// Performs 'sharp' RGBA->YUVA420 downsampling and colorspace conversion
-// Downsampling is handled with extra care in case of color clipping. This
-// method is roughly 2x slower than WebPPictureARGBToYUVA() but produces better
-// and sharper YUV representation.
-// Returns false in case of error.
-WEBP_NODISCARD WEBP_EXTERN int WebPPictureSharpARGBToYUVA(WebPPicture* picture);
-// kept for backward compatibility:
-WEBP_NODISCARD WEBP_EXTERN int WebPPictureSmartARGBToYUVA(WebPPicture* picture);
-
 // Converts picture->yuv to picture->argb and sets picture->use_argb to true.
 // The input format must be YUV_420 or YUV_420A. The conversion from YUV420 to
 // ARGB incurs a small loss too.
@@ -517,11 +470,6 @@ WEBP_NODISCARD WEBP_EXTERN int WebPPictureSmartARGBToYUVA(WebPPicture* picture);
 // raw ARGB samples, since using YUV420 is comparatively lossy.
 // Returns false in case of error.
 WEBP_NODISCARD WEBP_EXTERN int WebPPictureYUVAToARGB(WebPPicture* picture);
-
-// Helper function: given a width x height plane of RGBA or YUV(A) samples
-// clean-up or smoothen the YUV or RGB samples under fully transparent area,
-// to help compressibility (no guarantee, though).
-WEBP_EXTERN void WebPCleanupTransparentArea(WebPPicture* picture);
 
 // Scan the picture 'picture' for the presence of non fully opaque alpha values.
 // Returns true in such case. Otherwise returns false (indicating that the

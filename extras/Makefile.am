@@ -7,7 +7,6 @@ noinst_HEADERS += ../src/webp/types.h
 
 libwebpextras_la_SOURCES =
 libwebpextras_la_SOURCES += extras.c extras.h quality_estimate.c
-libwebpextras_la_SOURCES += sharpyuv_risk_table.c sharpyuv_risk_table.h
 
 libwebpextras_la_CPPFLAGS = $(AM_CPPFLAGS)
 libwebpextras_la_LDFLAGS = -lm

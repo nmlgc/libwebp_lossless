@@ -40,10 +40,7 @@ COMMON_SOURCES += yuv.c
 COMMON_SOURCES += yuv.h
 
 ENC_SOURCES =
-ENC_SOURCES += cost.c
-ENC_SOURCES += enc.c
 ENC_SOURCES += lossless_enc.c
-ENC_SOURCES += quant.h
 ENC_SOURCES += ssim.c
 
 libwebpdspdecode_avx2_la_SOURCES =
@@ -115,8 +112,6 @@ libwebpdspdecode_mips_dsp_r2_la_CPPFLAGS = $(libwebpdsp_mips_dsp_r2_la_CPPFLAGS)
 libwebpdspdecode_mips_dsp_r2_la_CFLAGS = $(libwebpdsp_mips_dsp_r2_la_CFLAGS)
 
 libwebpdsp_sse2_la_SOURCES =
-libwebpdsp_sse2_la_SOURCES += cost_sse2.c
-libwebpdsp_sse2_la_SOURCES += enc_sse2.c
 libwebpdsp_sse2_la_SOURCES += lossless_enc_sse2.c
 libwebpdsp_sse2_la_SOURCES += ssim_sse2.c
 libwebpdsp_sse2_la_CPPFLAGS = $(libwebpdsp_la_CPPFLAGS)
@@ -124,7 +119,6 @@ libwebpdsp_sse2_la_CFLAGS = $(AM_CFLAGS) $(SSE2_FLAGS)
 libwebpdsp_sse2_la_LIBADD = libwebpdspdecode_sse2.la
 
 libwebpdsp_sse41_la_SOURCES =
-libwebpdsp_sse41_la_SOURCES += enc_sse41.c
 libwebpdsp_sse41_la_SOURCES += lossless_enc_sse41.c
 libwebpdsp_sse41_la_CPPFLAGS = $(libwebpdsp_la_CPPFLAGS)
 libwebpdsp_sse41_la_CFLAGS = $(AM_CFLAGS) $(SSE41_FLAGS)
@@ -137,31 +131,24 @@ libwebpdsp_avx2_la_CFLAGS = $(AM_CFLAGS) $(AVX2_FLAGS)
 libwebpdsp_avx2_la_LIBADD = libwebpdspdecode_avx2.la
 
 libwebpdsp_neon_la_SOURCES =
-libwebpdsp_neon_la_SOURCES += cost_neon.c
-libwebpdsp_neon_la_SOURCES += enc_neon.c
 libwebpdsp_neon_la_SOURCES += lossless_enc_neon.c
 libwebpdsp_neon_la_CPPFLAGS = $(libwebpdsp_la_CPPFLAGS)
 libwebpdsp_neon_la_CFLAGS = $(AM_CFLAGS) $(NEON_FLAGS)
 libwebpdsp_neon_la_LIBADD = libwebpdspdecode_neon.la
 
 libwebpdsp_msa_la_SOURCES =
-libwebpdsp_msa_la_SOURCES += enc_msa.c
 libwebpdsp_msa_la_SOURCES += lossless_enc_msa.c
 libwebpdsp_msa_la_CPPFLAGS = $(libwebpdsp_la_CPPFLAGS)
 libwebpdsp_msa_la_CFLAGS = $(AM_CFLAGS)
 libwebpdsp_msa_la_LIBADD = libwebpdspdecode_msa.la
 
 libwebpdsp_mips32_la_SOURCES =
-libwebpdsp_mips32_la_SOURCES += cost_mips32.c
-libwebpdsp_mips32_la_SOURCES += enc_mips32.c
 libwebpdsp_mips32_la_SOURCES += lossless_enc_mips32.c
 libwebpdsp_mips32_la_CPPFLAGS = $(libwebpdsp_la_CPPFLAGS)
 libwebpdsp_mips32_la_CFLAGS = $(AM_CFLAGS)
 libwebpdsp_mips32_la_LIBADD = libwebpdspdecode_mips32.la
 
 libwebpdsp_mips_dsp_r2_la_SOURCES =
-libwebpdsp_mips_dsp_r2_la_SOURCES += cost_mips_dsp_r2.c
-libwebpdsp_mips_dsp_r2_la_SOURCES += enc_mips_dsp_r2.c
 libwebpdsp_mips_dsp_r2_la_SOURCES += lossless_enc_mips_dsp_r2.c
 libwebpdsp_mips_dsp_r2_la_CPPFLAGS = $(libwebpdsp_la_CPPFLAGS)
 libwebpdsp_mips_dsp_r2_la_CFLAGS = $(AM_CFLAGS)

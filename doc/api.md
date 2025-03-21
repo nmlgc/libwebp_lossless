@@ -4,24 +4,6 @@
 
 The main encoding functions are available in the header src/webp/encode.h
 
-The ready-to-use ones are:
-
-```c
-size_t WebPEncodeRGB(const uint8_t* rgb, int width, int height, int stride,
-                     float quality_factor, uint8_t** output);
-size_t WebPEncodeBGR(const uint8_t* bgr, int width, int height, int stride,
-                     float quality_factor, uint8_t** output);
-size_t WebPEncodeRGBA(const uint8_t* rgba, int width, int height, int stride,
-                      float quality_factor, uint8_t** output);
-size_t WebPEncodeBGRA(const uint8_t* bgra, int width, int height, int stride,
-                      float quality_factor, uint8_t** output);
-```
-
-They will convert raw RGB samples to a WebP data. The only control supplied is
-the quality factor.
-
-There are some variants for using the lossless format:
-
 ```c
 size_t WebPEncodeLosslessRGB(const uint8_t* rgb, int width, int height,
                              int stride, uint8_t** output);

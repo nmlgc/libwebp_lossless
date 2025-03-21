@@ -67,7 +67,6 @@ check_c_source_compiles(
   HAVE_MATH_LIBRARY)
 if(NOT HAVE_MATH_LIBRARY)
   message(STATUS "Adding -lm flag.")
-  list(APPEND SHARPYUV_DEP_LIBRARIES m)
   list(APPEND WEBP_DEP_LIBRARIES m)
 endif()
 
