@@ -67,24 +67,14 @@ static void Help(void) {
   printf(" gif2webp [options] gif_file -o webp_file\n");
   printf("Options:\n");
   printf("  -h / -help ............. this help\n");
-  printf("  -lossy ................. encode image using lossy compression\n");
-  printf("  -mixed ................. for each frame in the image, pick lossy\n"
-         "                           or lossless compression heuristically\n");
   printf("  -near_lossless <int> ... use near-lossless image preprocessing\n"
          "                           (0..100=off), default=100\n");
-  printf("  -sharp_yuv ............. use sharper (and slower) RGB->YUV "
-                                    "conversion\n"
-         "                           (lossy only)\n");
   printf("  -q <float> ............. quality factor (0:small..100:big)\n");
   printf("  -m <int> ............... compression method (0=fast, 6=slowest), "
          "default=4\n");
-  printf("  -min_size .............. minimize output size (default:off)\n"
-         "                           lossless compression by default; can be\n"
-         "                           combined with -q, -m, -lossy or -mixed\n"
-         "                           options\n");
+  printf("  -min_size .............. minimize output size (default:off)\n");
   printf("  -kmin <int> ............ min distance between key frames\n");
   printf("  -kmax <int> ............ max distance between key frames\n");
-  printf("  -f <int> ............... filter strength (0=off..100)\n");
   printf("  -metadata <string> ..... comma separated list of metadata to\n");
   printf("                           ");
   printf("copy from the input to the output if present\n");
@@ -167,15 +157,8 @@ int main(int argc, const char* argv[]) {
       FREE_WARGV_AND_RETURN(EXIT_SUCCESS);
     } else if (!strcmp(argv[c], "-o") && c < argc - 1) {
       out_file = GET_WARGV(argv, ++c);
-    } else if (!strcmp(argv[c], "-lossy")) {
-      config.lossless = 0;
-    } else if (!strcmp(argv[c], "-mixed")) {
-      enc_options.allow_mixed = 1;
-      config.lossless = 0;
     } else if (!strcmp(argv[c], "-near_lossless") && c < argc - 1) {
       config.near_lossless = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-sharp_yuv")) {
-      config.use_sharp_yuv = 1;
     } else if (!strcmp(argv[c], "-loop_compatibility")) {
       loop_compatibility = 1;
     } else if (!strcmp(argv[c], "-q") && c < argc - 1) {
@@ -190,8 +173,6 @@ int main(int argc, const char* argv[]) {
     } else if (!strcmp(argv[c], "-kmin") && c < argc - 1) {
       enc_options.kmin = ExUtilGetInt(argv[++c], 0, &parse_error);
       default_kmin = 0;
-    } else if (!strcmp(argv[c], "-f") && c < argc - 1) {
-      config.filter_strength = ExUtilGetInt(argv[++c], 0, &parse_error);
     } else if (!strcmp(argv[c], "-metadata") && c < argc - 1) {
       static const struct {
         const char* option;

@@ -44,12 +44,8 @@ static void Help(void) {
          "                        (0=only keyframes)\n");
   printf(" -kmin <int> .......... minimum number of frame between key-frames\n"
          "                        (0=disable key-frames altogether)\n");
-  printf(" -mixed ............... use mixed lossy/lossless automatic mode\n");
   printf(" -near_lossless <int> . use near-lossless image preprocessing\n"
          "                        (0..100=off), default=100\n");
-  printf(" -sharp_yuv ........... use sharper (and slower) RGB->YUV "
-                                  "conversion\n                        "
-                                  "(lossy only)\n");
   printf(" -loop <int> .......... loop count (default: 0, = infinite loop)\n");
   printf(" -v ................... verbose mode\n");
   printf(" -h ................... this help\n");
@@ -59,7 +55,6 @@ static void Help(void) {
   printf("Per-frame options (only used for subsequent images input):\n");
   printf(" -d <int> ............. frame duration in ms (default: 100)\n");
   printf(" -lossless ............ use lossless mode (default)\n");
-  printf(" -lossy ............... use lossy mode\n");
   printf(" -q <float> ........... quality\n");
   printf(" -m <int> ............. compression method (0=fast, 6=slowest), "
          "default=4\n");
@@ -69,7 +64,7 @@ static void Help(void) {
          "                                  with lossy animations)\n");
 
   printf("\n");
-  printf("example: img2webp -loop 2 in0.png -lossy in1.jpg\n"
+  printf("example: img2webp -loop 2 in0.png in1.jpg\n"
          "                  -d 80 in2.tiff -o out.webp\n");
   printf("\nNote: if a single file name is passed as the argument, the "
          "arguments will be\n");
@@ -193,14 +188,9 @@ int main(int argc, const char* argv[]) {
         }
       } else if (!strcmp(argv[c], "-min_size")) {
         anim_config.minimize_size = 1;
-      } else if (!strcmp(argv[c], "-mixed")) {
-        anim_config.allow_mixed = 1;
-        config.lossless = 0;
       } else if (!strcmp(argv[c], "-near_lossless") && c + 1 < argc) {
         argv[c] = NULL;
         config.near_lossless = ExUtilGetInt(argv[++c], 0, &parse_error);
-      } else if (!strcmp(argv[c], "-sharp_yuv")) {
-        config.use_sharp_yuv = 1;
       } else if (!strcmp(argv[c], "-v")) {
         verbose = 1;
       } else if (!strcmp(argv[c], "-h") || !strcmp(argv[c], "-help")) {
@@ -238,10 +228,8 @@ int main(int argc, const char* argv[]) {
     if (argv[c] == NULL) continue;
     if (argv[c][0] == '-') {    // parse local options
       int parse_error = 0;
-      if (!strcmp(argv[c], "-lossy")) {
-        if (!anim_config.allow_mixed) config.lossless = 0;
-      } else if (!strcmp(argv[c], "-lossless")) {
-        if (!anim_config.allow_mixed) config.lossless = 1;
+      if (!strcmp(argv[c], "-lossless")) {
+        if (!anim_config.lossy_22) config.lossless = 1;
       } else if (!strcmp(argv[c], "-q") && c + 1 < argc) {
         config.quality = ExUtilGetFloat(argv[++c], &parse_error);
       } else if (!strcmp(argv[c], "-m") && c + 1 < argc) {

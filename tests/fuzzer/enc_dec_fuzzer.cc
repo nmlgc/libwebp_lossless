@@ -53,9 +53,6 @@ void EncDecTest(bool use_argb, int source_image_index, WebPConfig config,
         config.method = 5;
       }
     }
-    if (config.alpha_quality == 100 && config.method == 6) {
-      config.alpha_quality = 99;
-    }
   }
 
   // Encode.

@@ -408,8 +408,6 @@ static void HelpLong(void) {
   printf("  -H / -longhelp ......... long help\n");
   printf("  -q <float> ............. quality factor (0:small..100:big), "
          "default=75\n");
-  printf("  -alpha_q <int> ......... transparency-compression quality (0..100),"
-         "\n                           default=100\n");
   printf("  -preset <string> ....... preset setting, one of:\n");
   printf("                            default, photo, picture,\n");
   printf("                            drawing, icon, text\n");
@@ -419,42 +417,15 @@ static void HelpLong(void) {
   printf("\n");
   printf("  -m <int> ............... compression method (0=fast, 6=slowest), "
          "default=4\n");
-  printf("  -segments <int> ........ number of segments to use (1..4), "
-         "default=4\n");
-  printf("  -size <int> ............ target size (in bytes)\n");
-  printf("  -psnr <float> .......... target PSNR (in dB. typically: 42)\n");
   printf("\n");
   printf("  -s <int> <int> ......... input size (width x height) for YUV\n");
-  printf("  -sns <int> ............. spatial noise shaping (0:off, 100:max), "
-         "default=50\n");
-  printf("  -f <int> ............... filter strength (0=off..100), "
-         "default=60\n");
-  printf("  -sharpness <int> ....... "
-         "filter sharpness (0:most .. 7:least sharp), default=0\n");
-  printf("  -strong ................ use strong filter instead "
-                                     "of simple (default)\n");
-  printf("  -nostrong .............. use simple filter instead of strong\n");
-  printf("  -sharp_yuv ............. use sharper (and slower) RGB->YUV "
-                                     "conversion\n");
-  printf("  -partition_limit <int> . limit quality to fit the 512k limit on\n");
-  printf("                           "
-         "the first partition (0=no degradation ... 100=full)\n");
-  printf("  -pass <int> ............ analysis pass number (1..10)\n");
-  printf("  -qrange <min> <max> .... specifies the permissible quality range\n"
-         "                           (default: 0 100)\n");
   printf("  -crop <x> <y> <w> <h> .. crop picture with the given rectangle\n");
   printf("  -resize <w> <h> ........ resize picture (*after* any cropping)\n");
   printf("  -mt .................... use multi-threading if available\n");
-  printf("  -low_memory ............ reduce memory usage (slower encoding)\n");
   printf("  -map <int> ............. print map of extra info\n");
   printf("  -print_psnr ............ prints averaged PSNR distortion\n");
   printf("  -print_ssim ............ prints averaged SSIM distortion\n");
   printf("  -print_lsim ............ prints local-similarity distortion\n");
-  printf("  -d <file.pgm> .......... dump the compressed output (PGM file)\n");
-  printf("  -alpha_method <int> .... transparency-compression method (0..1), "
-         "default=1\n");
-  printf("  -alpha_filter <string> . predictive filtering for alpha plane,\n");
-  printf("                           one of: none, fast (default) or best\n");
   printf("  -exact ................. preserve RGB values in transparent area, "
          "default=off\n");
   printf("  -blend_alpha <hex> ..... blend colors against background color\n"
@@ -462,7 +433,6 @@ static void HelpLong(void) {
          "                           hexadecimal, e.g. 0xc0e0d0 for red=0xc0\n"
          "                           green=0xe0 and blue=0xd0\n");
   printf("  -noalpha ............... discard any transparency information\n");
-  printf("  -lossless .............. encode image losslessly, default=off\n");
   printf("  -near_lossless <int> ... use near-lossless image preprocessing\n"
          "                           (0..100=off), default=100\n");
   printf("  -hint <string> ......... specify image characteristics hint,\n");
@@ -485,11 +455,6 @@ static void HelpLong(void) {
   printf("  -v ..................... verbose, e.g. print encoding/decoding "
          "times\n");
   printf("  -progress .............. report encoding progress\n");
-  printf("\n");
-  printf("Experimental Options:\n");
-  printf("  -jpeg_like ............. roughly match expected JPEG size\n");
-  printf("  -af .................... auto-adjust filter strength\n");
-  printf("  -pre <int> ............. pre-processing filter\n");
   printf("\n");
   printf("Supported input formats:\n  %s\n", WebPGetEnabledInputFileFormats());
 }
@@ -521,7 +486,7 @@ static const char* const kErrorMessages[VP8_ENC_ERROR_LAST] = {
 // Returns EXIT_SUCCESS on success, EXIT_FAILURE on failure.
 int main(int argc, const char* argv[]) {
   int return_value = EXIT_FAILURE;
-  const char* in_file = NULL, *out_file = NULL, *dump_file = NULL;
+  const char* in_file = NULL, *out_file = NULL;
   FILE* out = NULL;
   int c;
   int short_output = 0;
@@ -562,6 +527,8 @@ int main(int argc, const char* argv[]) {
     FREE_WARGV_AND_RETURN(EXIT_FAILURE);
   }
 
+  config.lossless = 1;
+
   for (c = 1; c < argc; ++c) {
     int parse_error = 0;
     if (!strcmp(argv[c], "-h") || !strcmp(argv[c], "-help")) {
@@ -572,17 +539,11 @@ int main(int argc, const char* argv[]) {
       FREE_WARGV_AND_RETURN(EXIT_SUCCESS);
     } else if (!strcmp(argv[c], "-o") && c + 1 < argc) {
       out_file = (const char*)GET_WARGV(argv, ++c);
-    } else if (!strcmp(argv[c], "-d") && c + 1 < argc) {
-      dump_file = (const char*)GET_WARGV(argv, ++c);
-      config.show_compressed = 1;
     } else if (!strcmp(argv[c], "-print_psnr")) {
-      config.show_compressed = 1;
       print_distortion = 0;
     } else if (!strcmp(argv[c], "-print_ssim")) {
-      config.show_compressed = 1;
       print_distortion = 1;
     } else if (!strcmp(argv[c], "-print_lsim")) {
-      config.show_compressed = 1;
       print_distortion = 2;
     } else if (!strcmp(argv[c], "-short")) {
       ++short_output;
@@ -605,10 +566,6 @@ int main(int argc, const char* argv[]) {
     } else if (!strcmp(argv[c], "-z") && c + 1 < argc) {
       lossless_preset = ExUtilGetInt(argv[++c], 0, &parse_error);
       if (use_lossless_preset != 0) use_lossless_preset = 1;
-    } else if (!strcmp(argv[c], "-alpha_q") && c + 1 < argc) {
-      config.alpha_quality = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-alpha_method") && c + 1 < argc) {
-      config.alpha_compression = ExUtilGetInt(argv[++c], 0, &parse_error);
     } else if (!strcmp(argv[c], "-alpha_cleanup")) {
       // This flag is obsolete, does opposite of -exact.
       config.exact = 0;
@@ -619,21 +576,11 @@ int main(int argc, const char* argv[]) {
       // background color is given in hex with an optional '0x' prefix
       background_color = ExUtilGetInt(argv[++c], 16, &parse_error);
       background_color = background_color & 0x00ffffffu;
-    } else if (!strcmp(argv[c], "-alpha_filter") && c + 1 < argc) {
-      ++c;
-      if (!strcmp(argv[c], "none")) {
-        config.alpha_filtering = 0;
-      } else if (!strcmp(argv[c], "fast")) {
-        config.alpha_filtering = 1;
-      } else if (!strcmp(argv[c], "best")) {
-        config.alpha_filtering = 2;
-      } else {
-        fprintf(stderr, "Error! Unrecognized alpha filter: %s\n", argv[c]);
-        goto Error;
-      }
     } else if (!strcmp(argv[c], "-noalpha")) {
       keep_alpha = 0;
     } else if (!strcmp(argv[c], "-lossless")) {
+      // We still support this option for compatibility with existing
+      // command lines written for the regular cwebp tool.
       config.lossless = 1;
     } else if (!strcmp(argv[c], "-near_lossless") && c + 1 < argc) {
       config.near_lossless = ExUtilGetInt(argv[++c], 0, &parse_error);
@@ -650,43 +597,8 @@ int main(int argc, const char* argv[]) {
         fprintf(stderr, "Error! Unrecognized image hint: %s\n", argv[c]);
         goto Error;
       }
-    } else if (!strcmp(argv[c], "-size") && c + 1 < argc) {
-      config.target_size = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-psnr") && c + 1 < argc) {
-      config.target_PSNR = ExUtilGetFloat(argv[++c], &parse_error);
-    } else if (!strcmp(argv[c], "-sns") && c + 1 < argc) {
-      config.sns_strength = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-f") && c + 1 < argc) {
-      config.filter_strength = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-af")) {
-      config.autofilter = 1;
-    } else if (!strcmp(argv[c], "-jpeg_like")) {
-      config.emulate_jpeg_size = 1;
     } else if (!strcmp(argv[c], "-mt")) {
       ++config.thread_level;  // increase thread level
-    } else if (!strcmp(argv[c], "-low_memory")) {
-      config.low_memory = 1;
-    } else if (!strcmp(argv[c], "-strong")) {
-      config.filter_type = 1;
-    } else if (!strcmp(argv[c], "-nostrong")) {
-      config.filter_type = 0;
-    } else if (!strcmp(argv[c], "-sharpness") && c + 1 < argc) {
-      config.filter_sharpness = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-sharp_yuv")) {
-      config.use_sharp_yuv = 1;
-    } else if (!strcmp(argv[c], "-pass") && c + 1 < argc) {
-      config.pass = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-qrange") && c + 2 < argc) {
-      config.qmin = ExUtilGetInt(argv[++c], 0, &parse_error);
-      config.qmax = ExUtilGetInt(argv[++c], 0, &parse_error);
-      if (config.qmin < 0) config.qmin = 0;
-      if (config.qmax > 100) config.qmax = 100;
-    } else if (!strcmp(argv[c], "-pre") && c + 1 < argc) {
-      config.preprocessing = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-segments") && c + 1 < argc) {
-      config.segments = ExUtilGetInt(argv[++c], 0, &parse_error);
-    } else if (!strcmp(argv[c], "-partition_limit") && c + 1 < argc) {
-      config.partition_limit = ExUtilGetInt(argv[++c], 0, &parse_error);
     } else if (!strcmp(argv[c], "-map") && c + 1 < argc) {
       picture.extra_info_type = ExUtilGetInt(argv[++c], 0, &parse_error);
     } else if (!strcmp(argv[c], "-crop") && c + 4 < argc) {
@@ -810,24 +722,6 @@ int main(int argc, const char* argv[]) {
     }
   }
 
-  // Check for unsupported command line options for lossless mode and log
-  // warning for such options.
-  if (!quiet && config.lossless == 1) {
-    if (config.target_size > 0 || config.target_PSNR > 0) {
-      fprintf(stderr, "Encoding for specified size or PSNR is not supported"
-                      " for lossless encoding. Ignoring such option(s)!\n");
-    }
-    if (config.partition_limit > 0) {
-      fprintf(stderr, "Partition limit option is not required for lossless"
-                      " encoding. Ignoring this option!\n");
-    }
-  }
-  // If a target size or PSNR was given, but somehow the -pass option was
-  // omitted, force a reasonable value.
-  if (config.target_size > 0 || config.target_PSNR > 0) {
-    if (config.pass == 1) config.pass = 6;
-  }
-
   if (!WebPValidateConfig(&config)) {
     fprintf(stderr, "Error! Invalid configuration.\n");
     goto Error;
@@ -836,8 +730,7 @@ int main(int argc, const char* argv[]) {
   // Read the input. We need to decide if we prefer ARGB or YUVA
   // samples, depending on the expected compression mode (this saves
   // some conversion steps).
-  picture.use_argb = (config.lossless || config.use_sharp_yuv ||
-                      config.preprocessing > 0 ||
+  picture.use_argb = (config.lossless ||
                       crop || (resize_w | resize_h) > 0);
   if (verbose) {
     StopwatchReset(&stop_watch);
@@ -971,13 +864,6 @@ int main(int argc, const char* argv[]) {
   if (picture.extra_info_type > 0) {
     AllocExtraInfo(&picture);
   }
-  // Save original picture for later comparison. Only for lossy as lossless does
-  // not modify 'picture' (even near-lossless).
-  if (print_distortion >= 0 && !config.lossless &&
-      !WebPPictureCopy(&picture, &original_picture)) {
-    fprintf(stderr, "Error! Cannot copy temporary picture\n");
-    goto Error;
-  }
 
   // Compress.
   if (verbose) {
@@ -1024,14 +910,6 @@ int main(int argc, const char* argv[]) {
       picture.stats = original_picture.stats;
     }
     original_picture.stats = NULL;
-  }
-
-  // Write the YUV planes to a PGM file. Only available for lossy.
-  if (dump_file) {
-    {
-      fprintf(stderr, "Warning: can't dump file (-d option) "
-                      "in lossless mode.\n");
-    }
   }
 
   if (use_memory_writer && out != NULL &&

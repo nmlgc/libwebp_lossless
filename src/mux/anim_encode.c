@@ -177,7 +177,7 @@ static void DefaultEncoderOptions(WebPAnimEncoderOptions* const enc_options) {
   enc_options->anim_params.bgcolor = 0xffffffff;  // White.
   enc_options->minimize_size = 0;
   DisableKeyframes(enc_options);
-  enc_options->allow_mixed = 0;
+  enc_options->lossy_22 = 0;
   enc_options->verbose = 0;
 }
 
@@ -807,12 +807,6 @@ static WebPEncodingError EncodeCandidate(WebPPicture* const sub_frame,
   // Encode picture.
   WebPMemoryWriterInit(&candidate->mem_);
 
-  if (!config.lossless && use_blending) {
-    // Disable filtering to avoid blockiness in reconstructed frames at the
-    // time of decoding.
-    config.autofilter = 0;
-    config.filter_strength = 0;
-  }
   if (!EncodeFrame(&config, sub_frame, &candidate->mem_)) {
     error_code = sub_frame->error_code;
     goto Err;
@@ -876,7 +870,7 @@ static WebPEncodingError GenerateCandidates(
                               config_lossy->quality);
 
   // Pick candidates to be tried.
-  if (!enc->options_.allow_mixed) {
+  if (!enc->options_.lossy_22) {
     evaluate_ll = is_lossless;
     evaluate_lossy = !is_lossless;
   } else if (enc->options_.minimize_size) {
@@ -979,7 +973,7 @@ static int IncreasePreviousDuration(WebPAnimEncoder* const enc, int duration) {
     };
     const WebPData lossy_1x1 = { lossy_1x1_bytes, sizeof(lossy_1x1_bytes) };
     const int can_use_lossless =
-        (enc->last_config_.lossless || enc->options_.allow_mixed);
+        (enc->last_config_.lossless || enc->options_.lossy_22);
     EncodedFrame* const curr_enc_frame = GetFrame(enc, enc->count_);
     curr_enc_frame->is_key_frame_ = 0;
     curr_enc_frame->sub_frame_.id = WEBP_CHUNK_ANMF;
@@ -1067,8 +1061,8 @@ static WebPEncodingError SetFrame(WebPAnimEncoder* const enc,
   const WebPPicture* const prev_canvas = &enc->prev_canvas_;
   Candidate candidates[CANDIDATE_COUNT];
   const int is_lossless = config->lossless;
-  const int consider_lossless = is_lossless || enc->options_.allow_mixed;
-  const int consider_lossy = !is_lossless || enc->options_.allow_mixed;
+  const int consider_lossless = is_lossless || enc->options_.lossy_22;
+  const int consider_lossy = !is_lossless || enc->options_.lossy_22;
   const int is_first_frame = enc->is_first_frame_;
 
   // First frame cannot be skipped as there is no 'previous frame' to merge it
@@ -1465,7 +1459,7 @@ static int FrameToFullCanvas(WebPAnimEncoder* const enc,
   if (!EncodeFrame(&enc->last_config_, canvas_buf, &mem1)) goto Err;
   GetEncodedData(&mem1, full_image);
 
-  if (enc->options_.allow_mixed) {
+  if (enc->options_.lossy_22) {
     if (!EncodeFrame(&enc->last_config_reversed_, canvas_buf, &mem2)) goto Err;
     if (mem2.size < mem1.size) {
       GetEncodedData(&mem2, full_image);

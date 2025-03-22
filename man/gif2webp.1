@@ -32,13 +32,6 @@ Usage information.
 .B \-version
 Print the version number (as major.minor.revision) and exit.
 .TP
-.B \-lossy
-Encode the image using lossy compression.
-.TP
-.B \-mixed
-Mixed compression mode: optimize compression of the image by picking either
-lossy or lossless compression for each frame heuristically.
-.TP
 .BI \-near_lossless " int
 Specify the level of near\-lossless image preprocessing. This option adjusts
 pixel values to help compressibility, but has minimal impact on the visual
@@ -47,21 +40,12 @@ quality. It triggers lossless compression mode automatically. The range is 0
 value is around 60. Note that lossy with \fB\-q 100\fP can at times yield
 better results.
 .TP
-.B \-sharp_yuv
-Use more accurate and sharper RGB->YUV conversion. Note that this process is
-slower than the default 'fast' RGB->YUV conversion.
-.TP
 .BI \-q " float
 Specify the compression factor for RGB channels between 0 and 100. The default
 is 75.
 .br
-In case of lossless compression (default), a small factor enables faster
-compression speed, but produces a larger file. Maximum compression is achieved
-by using a value of 100.
-.br
-In case of lossy compression (specified by the \-lossy option), a small factor
-produces a smaller file with lower quality. Best quality is achieved by using a
-value of 100.
+A small factor enables faster compression speed, but produces a larger file.
+Maximum compression is achieved by using a value of 100.
 .TP
 .BI \-m " int
 Specify the compression method to use. This parameter controls the
@@ -149,10 +133,6 @@ If an error occurs, \fBgif2webp\fP exits with the value of the C constant
 gif2webp picture.gif \-o picture.webp
 .br
 gif2webp \-q 70 picture.gif \-o picture.webp
-.br
-gif2webp \-lossy \-m 3 picture.gif \-o picture_lossy.webp
-.br
-gif2webp \-lossy \-f 50 picture.gif \-o picture.webp
 .br
 gif2webp \-q 70 \-o picture.webp \-\- \-\-\-picture.gif
 .br

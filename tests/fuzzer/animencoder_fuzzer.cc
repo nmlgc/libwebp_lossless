@@ -106,8 +106,8 @@ int AddFrame(WebPAnimEncoder** const enc,
   if (pic.width * pic.height > 32 * 32) {
     config.method = (config.method > 4) ? 4 : config.method;
     config.quality = (config.quality > 99.0f) ? 99.0f : config.quality;
-    config.alpha_quality =
-        (config.alpha_quality > 99) ? 99 : config.alpha_quality;
+    config.lossy_11 =
+        (config.lossy_11 > 99) ? 99 : config.lossy_11;
   }
 
   // Encode.
@@ -152,7 +152,7 @@ void AnimEncoderTest(std::string_view blob, bool minimize_size,
   anim_config.minimize_size = minimize_size;
   anim_config.kmin = kmin_kmax.first;
   anim_config.kmax = kmin_kmax.second;
-  anim_config.allow_mixed = allow_mixed;
+  anim_config.lossy_22 = allow_mixed;
   anim_config.verbose = 0;
 
   // For each frame.

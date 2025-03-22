@@ -81,40 +81,26 @@ struct WebPConfig {
 
   WebPImageHint image_hint;  // Hint for image type (lossless only for now).
 
-  int target_size;        // if non-zero, set the desired target size in bytes.
-                          // Takes precedence over the 'compression' parameter.
-  float target_PSNR;      // if non-zero, specifies the minimal distortion to
-                          // try to achieve. Takes precedence over target_size.
-  int segments;           // maximum number of segments to use, in [1..4]
-  int sns_strength;       // Spatial Noise Shaping. 0=off, 100=maximum.
-  int filter_strength;    // range: [0 = off .. 100 = strongest]
-  int filter_sharpness;   // range: [0 = off .. 7 = least sharp]
-  int filter_type;        // filtering type: 0 = simple, 1 = strong (only used
-                          // if filter_strength > 0 or autofilter > 0)
-  int autofilter;         // Auto adjust filter's strength [0 = off, 1 = on]
-  int alpha_compression;  // Algorithm for encoding the alpha plane (0 = none,
-                          // 1 = compressed with WebP lossless). Default is 1.
-  int alpha_filtering;    // Predictive filtering method for alpha plane.
-                          //  0: none, 1: fast, 2: best. Default if 1.
-  int alpha_quality;      // Between 0 (smallest size) and 100 (lossless).
-                          // Default is 100.
-  int pass;               // number of entropy-analysis passes (in [1..10]).
+  int lossy_01;
+  float lossy_02;
+  int lossy_03;
+  int lossy_04;
+  int lossy_05;
+  int lossy_06;
+  int lossy_07;
+  int lossy_08;
+  int lossy_09;
+  int lossy_10;
+  int lossy_11;
+  int lossy_12;
 
-  int show_compressed;    // if true, export the compressed picture back.
-                          // In-loop filtering is not applied.
-  int preprocessing;      // preprocessing filter:
-                          // 0=none, 1=segment-smooth, 2=pseudo-random dithering
-  int partitions;         // log2(number of token partitions) in [0..3]. Default
-                          // is set to 0 for easier progressive decoding.
-  int partition_limit;    // quality degradation allowed to fit the 512k limit
-                          // on prediction modes coding (0: no degradation,
-                          // 100: maximum possible degradation).
-  int emulate_jpeg_size;  // If true, compression parameters will be remapped
-                          // to better match the expected output size from
-                          // JPEG compression. Generally, the output size will
-                          // be similar but the degradation will be lower.
+  int lossy_13;
+  int lossy_14;
+  int lossy_15;
+  int lossy_16;
+  int lossy_17;
   int thread_level;       // If non-zero, try and use multi-threaded encoding.
-  int low_memory;         // If set, reduce memory usage (but increase CPU use).
+  int lossy_18;
 
   int near_lossless;      // Near lossless encoding [0 = max loss .. 100 = off
                           // (default)].
@@ -124,10 +110,10 @@ struct WebPConfig {
                           // value is 0.
 
   int use_delta_palette;  // reserved
-  int use_sharp_yuv;      // if needed, use sharp (and slow) RGB->YUV conversion
+  int lossy_19;
 
-  int qmin;               // minimum permissible quality factor
-  int qmax;               // maximum permissible quality factor
+  int lossy_20;
+  int lossy_21;
 };
 
 // Enumerate some predefined settings for WebPConfig, depending on the type

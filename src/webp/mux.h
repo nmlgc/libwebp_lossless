@@ -444,8 +444,7 @@ struct WebPAnimEncoderOptions {
                         // key-frame insertion is disabled; and if kmax == 1,
                         // then all frames will be key-frames (kmin value does
                         // not matter for these special cases).
-  int allow_mixed;      // If true, use mixed compression mode; may choose
-                        // either lossy and lossless for each frame.
+  int lossy_22;
   int verbose;          // If true, print info and warning messages to stderr.
 
   uint32_t padding[4];  // Padding for later use.
