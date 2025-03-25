@@ -1,3 +1,40 @@
+Fork of libwebp that removes the lossy encoder and everything related to it, as
+well as YUV input. Structure fields related to these parts have been dummied out
+to stay API- and API-compatible with the official library.
+
+### Why so violent? Why not just add a build flag?
+
+Lossless WebP is the best widely-supported codec for low-color 90s-era retro
+game images in 2025, [beating JPEG XL in the vast majority of my test
+cases](https://github.com/nmlgc/ssg/issues/54#issuecomment-2746624195). I want
+to understand, use, and maybe even tune the encoder without being constantly
+distracted by code and options that only apply to the lossy mode. PNG has
+received several alternative encoders over the years, but WebP hasn't received
+anywhere close to that level of attention – despite even its lower effort
+settings easily outperforming the strongest and slowest PNG encoders. There
+seems to be much more potential in lossless WebP than people have tapped into so
+far. Maybe because it gets overshadowed by the frequent criticism of its lossy
+mode?
+
+Also, binary size when statically linking the library. Since the lossy and
+lossless encoders are selected via structure fields rather than having unrelated
+API entry points, optimizers have a hard time removing the lossy branches you
+never wanted anyway. Removing all this code reduces the compiled binary size by
+172.5 KiB in my test case. This might not seem like much these days, but it's 1)
+code I did not ask for and 2) code I absolutely do not want to run by accident.
+
+Really though, why have people started to bundle lossless and lossy algorithms
+under the same format in the first place, especially if they share a negligible
+amount of code? It might make sense for Opus where SILK and CELT are different
+kinds of lossy, but *lossless* and lossy are two completely different paradigms.
+The bloat and usability confusion far outweigh any [situational tricks this
+might
+offer](https://www.reddit.com/r/compression/comments/wc61wt/comment/iiaqvbi/).
+
+Original README below.
+
+----
+
 # WebP Codec
 
 ```
