@@ -101,72 +101,11 @@ int WebPPictureAllocARGB(WebPPicture* const picture) {
   return 1;
 }
 
-int WebPPictureAllocYUVA(WebPPicture* const picture) {
-  const int has_alpha = (int)picture->colorspace & WEBP_CSP_ALPHA_BIT;
-  const int width = picture->width;
-  const int height = picture->height;
-  const int y_stride = width;
-  const int uv_width = (int)(((int64_t)width + 1) >> 1);
-  const int uv_height = (int)(((int64_t)height + 1) >> 1);
-  const int uv_stride = uv_width;
-  int a_width, a_stride;
-  uint64_t y_size, uv_size, a_size, total_size;
-  uint8_t* mem;
-
-  if (!WebPValidatePicture(picture)) return 0;
-
-  WebPSafeFree(picture->memory_);
-  WebPPictureResetBufferYUVA(picture);
-
-  // alpha
-  a_width = has_alpha ? width : 0;
-  a_stride = a_width;
-  y_size = (uint64_t)y_stride * height;
-  uv_size = (uint64_t)uv_stride * uv_height;
-  a_size =  (uint64_t)a_stride * height;
-
-  total_size = y_size + a_size + 2 * uv_size;
-
-  // Security and validation checks
-  if (width <= 0 || height <= 0 ||           // luma/alpha param error
-      uv_width <= 0 || uv_height <= 0) {     // u/v param error
-    return WebPEncodingSetError(picture, VP8_ENC_ERROR_BAD_DIMENSION);
-  }
-  // allocate a new buffer.
-  mem = (uint8_t*)WebPSafeMalloc(total_size, sizeof(*mem));
-  if (mem == NULL) {
-    return WebPEncodingSetError(picture, VP8_ENC_ERROR_OUT_OF_MEMORY);
-  }
-
-  // From now on, we're in the clear, we can no longer fail...
-  picture->memory_ = (void*)mem;
-  picture->y_stride  = y_stride;
-  picture->uv_stride = uv_stride;
-  picture->a_stride  = a_stride;
-
-  // TODO(skal): we could align the y/u/v planes and adjust stride.
-  picture->y = mem;
-  mem += y_size;
-
-  picture->u = mem;
-  mem += uv_size;
-  picture->v = mem;
-  mem += uv_size;
-
-  if (a_size > 0) {
-    picture->a = mem;
-    mem += a_size;
-  }
-  (void)mem;  // makes the static analyzer happy
-  return 1;
-}
-
 int WebPPictureAlloc(WebPPicture* picture) {
   if (picture != NULL) {
     WebPPictureFree(picture);   // erase previous buffer
 
     if (!picture->use_argb) {
-      return WebPPictureAllocYUVA(picture);
     } else {
       return WebPPictureAllocARGB(picture);
     }

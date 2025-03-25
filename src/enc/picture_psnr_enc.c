@@ -196,8 +196,8 @@ int WebPPictureDistortion(const WebPPicture* src, const WebPPicture* ref,
   if (!WebPPictureView(ref, 0, 0, w, h, &p1)) goto Error;
 
   // We always measure distortion in ARGB space.
-  if (p0.use_argb == 0 && !WebPPictureYUVAToARGB(&p0)) goto Error;
-  if (p1.use_argb == 0 && !WebPPictureYUVAToARGB(&p1)) goto Error;
+  if (p0.use_argb == 0) goto Error;
+  if (p1.use_argb == 0) goto Error;
   for (c = 0; c < 4; ++c) {
     float distortion;
     const size_t stride0 = 4 * (size_t)p0.argb_stride;

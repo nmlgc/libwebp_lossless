@@ -48,12 +48,6 @@ int ImgIoUtilWriteFile(const char* const file_name,
 
 //------------------------------------------------------------------------------
 
-// Copy width x height pixels from 'src' to 'dst' honoring the strides.
-void ImgIoUtilCopyPlane(const uint8_t* src, int src_stride,
-                        uint8_t* dst, int dst_stride, int width, int height);
-
-//------------------------------------------------------------------------------
-
 // Returns 0 in case of overflow, memory over-allocation or excessive dimension.
 int ImgIoUtilCheckSizeArgumentsOverflow(uint64_t stride, size_t height);
 

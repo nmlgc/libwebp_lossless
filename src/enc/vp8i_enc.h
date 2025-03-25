@@ -55,12 +55,6 @@ void WebPPictureResetBuffers(WebPPicture* const picture);
 // (invalid param, out-of-memory).
 int WebPPictureAllocARGB(WebPPicture* const picture);
 
-// Allocates YUVA buffer according to set width/height (previous one is always
-// free'd). Uses picture->csp to determine whether an alpha buffer is needed.
-// Preserves the ARGB buffer.
-// Returns false in case of error (invalid param, out-of-memory).
-int WebPPictureAllocYUVA(WebPPicture* const picture);
-
 // Replace samples that are fully transparent by 'color' to help compressibility
 // (no guarantee, though). Assumes pic->use_argb is true.
 void WebPReplaceTransparentPixels(WebPPicture* const pic, uint32_t color);

@@ -8,7 +8,6 @@
 // -----------------------------------------------------------------------------
 //
 //  simple command line calling the WebPEncode function.
-//  Encodes a raw .YUV into WebP bitstream
 //
 // Author: Skal (pascal.massimino@gmail.com)
 
@@ -45,33 +44,6 @@ extern void* VP8GetCPUInfo;   // opaque forward declaration.
 
 static int verbose = 0;
 
-static int ReadYUV(const uint8_t* const data, size_t data_size,
-                   WebPPicture* const pic) {
-  const int use_argb = pic->use_argb;
-  const int uv_width = (pic->width + 1) / 2;
-  const int uv_height = (pic->height + 1) / 2;
-  const int y_plane_size = pic->width * pic->height;
-  const int uv_plane_size = uv_width * uv_height;
-  const size_t expected_data_size = y_plane_size + 2 * uv_plane_size;
-
-  if (data_size != expected_data_size) {
-    fprintf(stderr,
-            "input data doesn't have the expected size (%d instead of %d)\n",
-            (int)data_size, (int)expected_data_size);
-    return 0;
-  }
-
-  pic->use_argb = 0;
-  if (!WebPPictureAlloc(pic)) return 0;
-  ImgIoUtilCopyPlane(data, pic->width, pic->y, pic->y_stride,
-                     pic->width, pic->height);
-  ImgIoUtilCopyPlane(data + y_plane_size, uv_width,
-                     pic->u, pic->uv_stride, uv_width, uv_height);
-  ImgIoUtilCopyPlane(data + y_plane_size + uv_plane_size, uv_width,
-                     pic->v, pic->uv_stride, uv_width, uv_height);
-  return use_argb ? WebPPictureYUVAToARGB(pic) : 1;
-}
-
 #ifdef HAVE_WINCODEC_H
 
 static int ReadPicture(const char* const filename, WebPPicture* const pic,
@@ -81,7 +53,6 @@ static int ReadPicture(const char* const filename, WebPPicture* const pic,
   size_t data_size = 0;
   if (pic->width != 0 && pic->height != 0) {
     ok = ImgIoUtilReadFile(filename, &data, &data_size);
-    ok = ok && ReadYUV(data, data_size, pic);
   } else {
     // If no size specified, try to decode it using WIC.
     ok = ReadPictureWithWIC(filename, pic, keep_alpha, metadata);
@@ -112,9 +83,6 @@ static int ReadPicture(const char* const filename, WebPPicture* const pic,
   if (pic->width == 0 || pic->height == 0) {
     WebPImageReader reader = WebPGuessImageReader(data, data_size);
     ok = reader(data, data_size, pic, keep_alpha, metadata);
-  } else {
-    // If image size is specified, infer it as YUV format.
-    ok = ReadYUV(data, data_size, pic);
   }
  End:
   if (!ok) {
@@ -397,8 +365,7 @@ static void HelpShort(void) {
 static void HelpLong(void) {
   printf("Usage:\n");
   printf(" cwebp_lossless [-preset <...>] [options] in_file [-o out_file]\n\n");
-  printf("If input size (-s) for an image is not specified, it is\n"
-         "assumed to be a PNG, JPEG, TIFF or WebP file.\n");
+  printf("The image is assumed to be a PNG, JPEG, TIFF or WebP file.\n");
   printf("Note: Animated PNG and WebP files are not supported.\n");
 #ifdef HAVE_WINCODEC_H
   printf("Windows builds can take as input any of the files handled by WIC.\n");
@@ -418,7 +385,6 @@ static void HelpLong(void) {
   printf("  -m <int> ............... compression method (0=fast, 6=slowest), "
          "default=4\n");
   printf("\n");
-  printf("  -s <int> <int> ......... input size (width x height) for YUV\n");
   printf("  -crop <x> <y> <w> <h> .. crop picture with the given rectangle\n");
   printf("  -resize <w> <h> ........ resize picture (*after* any cropping)\n");
   printf("  -mt .................... use multi-threading if available\n");
@@ -727,9 +693,7 @@ int main(int argc, const char* argv[]) {
     goto Error;
   }
 
-  // Read the input. We need to decide if we prefer ARGB or YUVA
-  // samples, depending on the expected compression mode (this saves
-  // some conversion steps).
+  // Read the input.
   picture.use_argb = (config.lossless ||
                       crop || (resize_w | resize_h) > 0);
   if (verbose) {

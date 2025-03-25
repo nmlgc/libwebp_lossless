@@ -74,7 +74,7 @@ int WebPEncode(const WebPConfig* config, WebPPicture* pic) {
     return 0;
   } else {
     // Make sure we have ARGB samples.
-    if (pic->argb == NULL && !WebPPictureYUVAToARGB(pic)) {
+    if (pic->argb == NULL) {
       return 0;
     }
 

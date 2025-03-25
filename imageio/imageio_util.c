@@ -142,17 +142,6 @@ int ImgIoUtilWriteFile(const char* const file_name,
 
 // -----------------------------------------------------------------------------
 
-void ImgIoUtilCopyPlane(const uint8_t* src, int src_stride,
-                        uint8_t* dst, int dst_stride, int width, int height) {
-  while (height-- > 0) {
-    memcpy(dst, src, width * sizeof(*dst));
-    src += src_stride;
-    dst += dst_stride;
-  }
-}
-
-// -----------------------------------------------------------------------------
-
 int ImgIoUtilCheckSizeArgumentsOverflow(uint64_t stride, size_t height) {
   const uint64_t total_size = stride * height;
   int ok = (total_size == (size_t)total_size);

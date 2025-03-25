@@ -1377,14 +1377,9 @@ int WebPAnimEncoderAdd(WebPAnimEncoder* enc, WebPPicture* frame, int timestamp,
   }
 
   if (!frame->use_argb) {  // Convert frame from YUV(A) to ARGB.
-    if (enc->options_.verbose) {
-      fprintf(stderr, "WARNING: Converting frame from YUV(A) to ARGB format; "
-              "this incurs a small loss.\n");
-    }
-    if (!WebPPictureYUVAToARGB(frame)) {
-      MarkError(enc, "ERROR converting frame from YUV(A) to ARGB");
-      return 0;
-    }
+    MarkError(enc, "ERROR converting frame from YUV(A) to ARGB "
+              "(not supported by this build)");
+    return 0;
   }
 
   if (encoder_config != NULL) {

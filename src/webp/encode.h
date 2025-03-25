@@ -449,14 +449,6 @@ WEBP_NODISCARD WEBP_EXTERN int WebPPictureImportBGRA(
 WEBP_NODISCARD WEBP_EXTERN int WebPPictureImportBGRX(
     WebPPicture* picture, const uint8_t* bgrx, int bgrx_stride);
 
-// Converts picture->yuv to picture->argb and sets picture->use_argb to true.
-// The input format must be YUV_420 or YUV_420A. The conversion from YUV420 to
-// ARGB incurs a small loss too.
-// Note that the use of this colorspace is discouraged if one has access to the
-// raw ARGB samples, since using YUV420 is comparatively lossy.
-// Returns false in case of error.
-WEBP_NODISCARD WEBP_EXTERN int WebPPictureYUVAToARGB(WebPPicture* picture);
-
 // Scan the picture 'picture' for the presence of non fully opaque alpha values.
 // Returns true in such case. Otherwise returns false (indicating that the
 // alpha plane can be ignored altogether e.g.).

@@ -488,8 +488,7 @@ static WEBP_INLINE WebPAnimEncoder* WebPAnimEncoderNew(
 // determine the duration of the last frame.
 // Parameters:
 //   enc - (in/out) object to which the frame is to be added.
-//   frame - (in/out) frame data in ARGB or YUV(A) format. If it is in YUV(A)
-//           format, it will be converted to ARGB, which incurs a small loss.
+//   frame - (in/out) frame data in ARGB format.
 //   timestamp_ms - (in) timestamp of this frame in milliseconds.
 //                       Duration of a frame would be calculated as
 //                       "timestamp of next frame - timestamp of this frame".

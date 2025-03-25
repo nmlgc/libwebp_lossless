@@ -312,11 +312,6 @@ void WebPSamplerProcessPlane(const uint8_t* WEBP_RESTRICT y, int y_stride,
 // Sampling functions to convert rows of YUV to RGB(A)
 extern WebPSamplerRowFunc WebPSamplers[/* MODE_LAST */];
 
-// General function for converting two lines of ARGB or RGBA.
-// 'alpha_is_last' should be true if 0xff000000 is stored in memory as
-// as 0x00, 0x00, 0x00, 0xff (little endian).
-WebPUpsampleLinePairFunc WebPGetLinePairConverter(int alpha_is_last);
-
 // YUV444->RGB converters
 typedef void (*WebPYUV444Converter)(const uint8_t* WEBP_RESTRICT y,
                                     const uint8_t* WEBP_RESTRICT u,
