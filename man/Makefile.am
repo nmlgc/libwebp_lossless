@@ -1,4 +1,4 @@
-man_MANS = cwebp.1 dwebp.1
+man_MANS = cwebp_lossless.1 dwebp.1
 if BUILD_MUX
   man_MANS += webpmux.1
 endif

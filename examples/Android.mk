@@ -30,7 +30,7 @@ LOCAL_SRC_FILES := \
 LOCAL_CFLAGS := $(WEBP_CFLAGS)
 LOCAL_STATIC_LIBRARIES := example_util imageio_util imagedec webpdemux webp
 
-LOCAL_MODULE := cwebp
+LOCAL_MODULE := cwebp_lossless
 
 include $(BUILD_EXECUTABLE)
 

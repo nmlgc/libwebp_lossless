@@ -2,7 +2,7 @@ AM_CPPFLAGS += -I$(top_builddir)/src -I$(top_srcdir)/src
 
 bin_PROGRAMS =
 if BUILD_DEMUX
-  bin_PROGRAMS += dwebp cwebp
+  bin_PROGRAMS += dwebp cwebp_lossless
 endif
 if BUILD_ANIMDIFF
   noinst_PROGRAMS = anim_diff anim_dump
@@ -46,14 +46,14 @@ anim_dump_LDADD += ../imageio/libimageio_util.la
 anim_dump_LDADD += ../imageio/libimageenc.la
 anim_dump_LDADD += $(PNG_LIBS) $(GIF_LIBS) $(TIFF_LIBS) -lm
 
-cwebp_SOURCES  = cwebp.c stopwatch.h
-cwebp_CPPFLAGS  = $(AM_CPPFLAGS) -I$(top_srcdir)
-cwebp_LDADD  =
-cwebp_LDADD += libexample_util.la
-cwebp_LDADD += ../imageio/libimageio_util.la
-cwebp_LDADD += ../imageio/libimagedec.la
-cwebp_LDADD += ../src/libwebp.la
-cwebp_LDADD += $(JPEG_LIBS) $(PNG_LIBS) $(TIFF_LIBS)
+cwebp_lossless_SOURCES  = cwebp.c stopwatch.h
+cwebp_lossless_CPPFLAGS  = $(AM_CPPFLAGS) -I$(top_srcdir)
+cwebp_lossless_LDADD  =
+cwebp_lossless_LDADD += libexample_util.la
+cwebp_lossless_LDADD += ../imageio/libimageio_util.la
+cwebp_lossless_LDADD += ../imageio/libimagedec.la
+cwebp_lossless_LDADD += ../src/libwebp.la
+cwebp_lossless_LDADD += $(JPEG_LIBS) $(PNG_LIBS) $(TIFF_LIBS)
 
 dwebp_SOURCES = dwebp.c stopwatch.h
 dwebp_CPPFLAGS  = $(AM_CPPFLAGS)

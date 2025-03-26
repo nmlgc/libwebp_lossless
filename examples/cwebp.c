@@ -388,7 +388,7 @@ static int ProgressReport(int percent, const WebPPicture* const picture) {
 
 static void HelpShort(void) {
   printf("Usage:\n\n");
-  printf("   cwebp [options] -q quality input.png -o output.webp\n\n");
+  printf("   cwebp_lossless [options] -q quality input.png -o output.webp\n\n");
   printf("where quality is between 0 (poor) to 100 (very good).\n");
   printf("Typical value is around 80.\n\n");
   printf("Try -longhelp for an exhaustive list of advanced options.\n");
@@ -396,7 +396,7 @@ static void HelpShort(void) {
 
 static void HelpLong(void) {
   printf("Usage:\n");
-  printf(" cwebp [-preset <...>] [options] in_file [-o out_file]\n\n");
+  printf(" cwebp_lossless [-preset <...>] [options] in_file [-o out_file]\n\n");
   printf("If input size (-s) for an image is not specified, it is\n"
          "assumed to be a PNG, JPEG, TIFF or WebP file.\n");
   printf("Note: Animated PNG and WebP files are not supported.\n");
@@ -474,7 +474,7 @@ static const char* const kErrorMessages[VP8_ENC_ERROR_LAST] = {
   "To reduce the size of this partition, try using less segments "
   "with the -segments option, and eventually reduce the number of "
   "header bits using -partition_limit. More details are available "
-  "in the manual (`man cwebp`)",
+  "in the manual (`man cwebp_lossless`)",
   "PARTITION_OVERFLOW: Partition is too big to fit 16M",
   "BAD_WRITE: Picture writer returned an I/O error",
   "FILE_TOO_BIG: File would be too big to fit in 4G",

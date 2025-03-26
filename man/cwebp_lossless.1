@@ -1,24 +1,24 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH CWEBP 1 "September 17, 2024"
+.TH CWEBP_LOSSLESS 1 "September 17, 2024"
 .SH NAME
-cwebp \- compress an image file to a WebP file
+cwebp_lossless \- compress an image file to a WebP file
 .SH SYNOPSIS
-.B cwebp
+.B cwebp_lossless
 .RI [ options ] " input_file \-o output_file.webp
 .br
 .SH DESCRIPTION
 This manual page documents the
-.B cwebp
+.B cwebp_lossless
 command.
 .PP
-\fBcwebp\fP compresses an image using the WebP format.
+\fBcwebp_lossless\fP compresses an image using the WebP format.
 Input format can be either PNG, JPEG, TIFF, WebP or raw Y'CbCr samples.
 Note: Animated PNG and WebP files are not supported.
 .SH OPTIONS
 The basic options are:
 .TP
 .BI \-o " string
-Specify the name of the output WebP file. If omitted, \fBcwebp\fP will
+Specify the name of the output WebP file. If omitted, \fBcwebp_lossless\fP will
 perform compression but only report statistics.
 Using "\-" as output name will direct output to 'stdout'.
 .TP
@@ -165,21 +165,21 @@ Note: each input format may not support all combinations.
 Disable all assembly optimizations.
 
 .SH EXIT STATUS
-If there were no problems during execution, \fBcwebp\fP exits with the value of
-the C constant \fBEXIT_SUCCESS\fP. This is usually zero.
+If there were no problems during execution, \fBcwebp_lossless\fP exits with the
+value of the C constant \fBEXIT_SUCCESS\fP. This is usually zero.
 .PP
-If an error occurs, \fBcwebp\fP exits with the value of the C constant
+If an error occurs, \fBcwebp_lossless\fP exits with the value of the C constant
 \fBEXIT_FAILURE\fP. This is usually one.
 
 .SH EXAMPLES
-cwebp \-q 50 -lossless picture.png \-o picture_lossless.webp
+cweb_lossless p \-q 50 picture.png \-o picture_lossless.webp
 .br
-cwebp \-q 70 picture_with_alpha.png \-o picture_with_alpha.webp
+cwebp_lossless \-q 70 picture_with_alpha.png \-o picture_with_alpha.webp
 .br
-cwebp \-o picture.webp \-\- \-\-\-picture.png
+cwebp_lossless \-o picture.webp \-\- \-\-\-picture.png
 
 .SH AUTHORS
-\fBcwebp\fP is a part of libwebp and was written by the WebP team.
+\fBcwebp_lossless\fP is a part of libwebp and was written by the WebP team.
 .br
 The latest source tree is available at
 https://chromium.googlesource.com/webm/libwebp

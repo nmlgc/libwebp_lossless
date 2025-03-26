@@ -325,7 +325,7 @@ OUT_LIBS = $(LIBWEBPDECODER) $(LIBWEBP)
 ex: $(OUT_LIBS)
 all: ex
 !ELSE
-OUT_EXAMPLES = $(DIRBIN)\cwebp.exe $(DIRBIN)\dwebp.exe
+OUT_EXAMPLES = $(DIRBIN)\cwebp_lossless.exe $(DIRBIN)\dwebp.exe
 EXTRA_EXAMPLES = $(DIRBIN)\vwebp.exe $(DIRBIN)\webpmux.exe \
                  $(DIRBIN)\img2webp.exe $(DIRBIN)\get_disto.exe \
                  $(DIRBIN)\webp_quality.exe $(DIRBIN)\vwebp_sdl.exe \
@@ -346,9 +346,9 @@ $(DIRBIN)\anim_dump.exe: $(DIROBJ)\examples\anim_dump.obj $(EX_ANIM_UTIL_OBJS)
 $(DIRBIN)\anim_dump.exe: $(EX_UTIL_OBJS) $(IMAGEIO_UTIL_OBJS)
 $(DIRBIN)\anim_dump.exe: $(EX_GIF_DEC_OBJS) $(LIBWEBPDEMUX) $(LIBWEBP)
 $(DIRBIN)\anim_dump.exe: $(IMAGEIO_ENC_OBJS)
-$(DIRBIN)\cwebp.exe: $(DIROBJ)\examples\cwebp.obj $(IMAGEIO_DEC_OBJS)
-$(DIRBIN)\cwebp.exe: $(IMAGEIO_UTIL_OBJS)
-$(DIRBIN)\cwebp.exe: $(LIBWEBPDEMUX)
+$(DIRBIN)\cwebp_lossless.exe: $(DIROBJ)\examples\cwebp.obj $(IMAGEIO_DEC_OBJS)
+$(DIRBIN)\cwebp_lossless.exe: $(IMAGEIO_UTIL_OBJS)
+$(DIRBIN)\cwebp_lossless.exe: $(LIBWEBPDEMUX)
 $(DIRBIN)\dwebp.exe: $(DIROBJ)\examples\dwebp.obj $(IMAGEIO_DEC_OBJS)
 $(DIRBIN)\dwebp.exe: $(IMAGEIO_ENC_OBJS)
 $(DIRBIN)\dwebp.exe: $(IMAGEIO_UTIL_OBJS)

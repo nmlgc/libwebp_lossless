@@ -320,7 +320,7 @@ OUT_LIBS += imageio/libimageenc.a
 OUT_LIBS += src/libwebpdecoder.a
 OUT_LIBS += src/libwebp.a
 EXTRA_LIB = extras/libwebpextras.a
-OUT_EXAMPLES = examples/cwebp examples/dwebp
+OUT_EXAMPLES = examples/cwebp_lossless examples/dwebp
 EXTRA_EXAMPLES = examples/gif2webp examples/vwebp examples/webpmux \
                  examples/anim_diff examples/anim_dump \
                  examples/img2webp examples/webpinfo
@@ -370,7 +370,7 @@ src/demux/libwebpdemux.a: $(LIBWEBPDEMUX_OBJS)
 
 examples/anim_diff: examples/anim_diff.o $(ANIM_UTIL_OBJS) $(GIFDEC_OBJS)
 examples/anim_dump: examples/anim_dump.o $(ANIM_UTIL_OBJS) $(GIFDEC_OBJS)
-examples/cwebp: examples/cwebp.o
+examples/cwebp_lossless: examples/cwebp.o
 examples/dwebp: examples/dwebp.o
 examples/gif2webp: examples/gif2webp.o $(GIFDEC_OBJS)
 examples/vwebp: examples/vwebp.o
@@ -390,12 +390,12 @@ examples/anim_dump: imageio/libimageio_util.a
 examples/anim_dump: imageio/libimageenc.a
 examples/anim_dump: src/libwebp.a
 examples/anim_dump: override EXTRA_LIBS += $(GIF_LIBS) $(DWEBP_LIBS)
-examples/cwebp: examples/libexample_util.a
-examples/cwebp: imageio/libimagedec.a
-examples/cwebp: src/demux/libwebpdemux.a
-examples/cwebp: imageio/libimageio_util.a
-examples/cwebp: src/libwebp.a
-examples/cwebp: override EXTRA_LIBS += $(CWEBP_LIBS)
+examples/cwebp_lossless: examples/libexample_util.a
+examples/cwebp_lossless: imageio/libimagedec.a
+examples/cwebp_lossless: src/demux/libwebpdemux.a
+examples/cwebp_lossless: imageio/libimageio_util.a
+examples/cwebp_lossless: src/libwebp.a
+examples/cwebp_lossless: override EXTRA_LIBS += $(CWEBP_LIBS)
 examples/dwebp: examples/libexample_util.a
 examples/dwebp: imageio/libimagedec.a
 examples/dwebp: src/demux/libwebpdemux.a

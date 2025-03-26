@@ -503,6 +503,7 @@ if(WEBP_BUILD_CWEBP)
   # cwebp
   parse_makefile_am(${CMAKE_CURRENT_SOURCE_DIR}/examples "CWEBP_SRCS" "cwebp")
   add_executable(cwebp ${CWEBP_SRCS})
+  set_target_properties(cwebp PROPERTIES OUTPUT_NAME "cwebp_lossless")
   target_link_libraries(cwebp exampleutil imagedec webp)
   target_include_directories(cwebp PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src
                                            ${CMAKE_CURRENT_SOURCE_DIR})
@@ -796,7 +797,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/WebPConfigVersion.cmake"
 
 # Install the man pages.
 set(MAN_PAGES
-    cwebp.1
+    cwebp_lossless.1
     dwebp.1
     gif2webp.1
     img2webp.1
@@ -804,7 +805,7 @@ set(MAN_PAGES
     webpmux.1
     webpinfo.1)
 set(EXEC_BUILDS
-    "CWEBP"
+    "CWEBP_LOSSLESS"
     "DWEBP"
     "GIF2WEBP"
     "IMG2WEBP"

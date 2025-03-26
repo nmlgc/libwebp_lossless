@@ -311,7 +311,7 @@ model {
       }
     }
 
-    cwebp(NativeExecutableSpec) {
+    cwebp_lossless(NativeExecutableSpec) {
       binaries {
         all {
           lib library: "example_util", linkage: "static"
