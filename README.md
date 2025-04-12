@@ -1,6 +1,6 @@
 Fork of libwebp that removes the lossy encoder and everything related to it, as
 well as YUV input. Structure fields related to these parts have been dummied out
-to stay API- and API-compatible with the official library.
+to stay API- and ABI-compatible with the official library.
 
 ### Why so violent? Why not just add a build flag?
 
