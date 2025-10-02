@@ -501,7 +501,7 @@ endif()
 
 if(WEBP_BUILD_CWEBP)
   # cwebp
-  parse_makefile_am(${CMAKE_CURRENT_SOURCE_DIR}/examples "CWEBP_SRCS" "cwebp")
+  parse_makefile_am(${CMAKE_CURRENT_SOURCE_DIR}/examples "CWEBP_SRCS" "cwebp_lossless")
   add_executable(cwebp ${CWEBP_SRCS})
   set_target_properties(cwebp PROPERTIES OUTPUT_NAME "cwebp_lossless")
   target_link_libraries(cwebp exampleutil imagedec webp)
