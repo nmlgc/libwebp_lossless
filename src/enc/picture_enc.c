@@ -14,9 +14,12 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "src/enc/vp8i_enc.h"
 #include "src/utils/utils.h"
+#include "src/webp/encode.h"
+#include "src/webp/types.h"
 
 //------------------------------------------------------------------------------
 // WebPPicture
@@ -33,7 +36,7 @@ static int DummyWriter(const uint8_t* data, size_t data_size,
 
 int WebPPictureInitInternal(WebPPicture* picture, int version) {
   if (WEBP_ABI_IS_INCOMPATIBLE(version, WEBP_ENCODER_ABI_VERSION)) {
-    return 0;   // caller/system version mismatch!
+    return 0;  // caller/system version mismatch!
   }
   if (picture != NULL) {
     memset(picture, 0, sizeof(*picture));
@@ -103,7 +106,7 @@ int WebPPictureAllocARGB(WebPPicture* const picture) {
 
 int WebPPictureAlloc(WebPPicture* picture) {
   if (picture != NULL) {
-    WebPPictureFree(picture);   // erase previous buffer
+    WebPPictureFree(picture);  // erase previous buffer
 
     if (!picture->use_argb) {
     } else {
@@ -208,19 +211,19 @@ static size_t Encode(const uint8_t* rgba, int width, int height, int stride,
   return wrt.size;
 }
 
-#define ENCODE_FUNC(NAME, IMPORTER)                                     \
-size_t NAME(const uint8_t* in, int w, int h, int bps, float q,          \
-            uint8_t** out) {                                            \
-  return Encode(in, w, h, bps, IMPORTER, q, 0, out);                    \
-}
+#define ENCODE_FUNC(NAME, IMPORTER)                              \
+  size_t NAME(const uint8_t* in, int w, int h, int bps, float q, \
+              uint8_t** out) {                                   \
+    return Encode(in, w, h, bps, IMPORTER, q, 0, out);           \
+  }
 
 #undef ENCODE_FUNC
 
 #define LOSSLESS_DEFAULT_QUALITY 70.
-#define LOSSLESS_ENCODE_FUNC(NAME, IMPORTER)                                 \
-size_t NAME(const uint8_t* in, int w, int h, int bps, uint8_t** out) {       \
-  return Encode(in, w, h, bps, IMPORTER, LOSSLESS_DEFAULT_QUALITY, 1, out);  \
-}
+#define LOSSLESS_ENCODE_FUNC(NAME, IMPORTER)                                  \
+  size_t NAME(const uint8_t* in, int w, int h, int bps, uint8_t** out) {      \
+    return Encode(in, w, h, bps, IMPORTER, LOSSLESS_DEFAULT_QUALITY, 1, out); \
+  }
 
 LOSSLESS_ENCODE_FUNC(WebPEncodeLosslessRGB, WebPPictureImportRGB)
 LOSSLESS_ENCODE_FUNC(WebPEncodeLosslessRGBA, WebPPictureImportRGBA)

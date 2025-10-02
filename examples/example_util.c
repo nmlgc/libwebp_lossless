@@ -17,8 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "webp/mux_types.h"
 #include "../imageio/imageio_util.h"
+#include "webp/mux_types.h"
+#include "webp/types.h"
 
 //------------------------------------------------------------------------------
 // String parsing
@@ -45,7 +46,7 @@ int ExUtilGetInts(const char* v, int base, int max_output, int output[]) {
     if (error) return -1;
     output[n] = value;
     v = strchr(v, ',');
-    if (v != NULL) ++v;   // skip over the trailing ','
+    if (v != NULL) ++v;  // skip over the trailing ','
   }
   return n;
 }
@@ -66,17 +67,17 @@ float ExUtilGetFloat(const char* const v, int* const error) {
 static void ResetCommandLineArguments(int argc, const char* argv[],
                                       CommandLineArguments* const args) {
   assert(args != NULL);
-  args->argc_ = argc;
-  args->argv_ = argv;
-  args->own_argv_ = 0;
-  WebPDataInit(&args->argv_data_);
+  args->argc = argc;
+  args->argv = argv;
+  args->own_argv = 0;
+  WebPDataInit(&args->argv_data);
 }
 
 void ExUtilDeleteCommandLineArguments(CommandLineArguments* const args) {
   if (args != NULL) {
-    if (args->own_argv_) {
-      WebPFree((void*)args->argv_);
-      WebPDataClear(&args->argv_data_);
+    if (args->own_argv) {
+      WebPFree((void*)args->argv);
+      WebPDataClear(&args->argv_data);
     }
     ResetCommandLineArguments(0, NULL, args);
   }
@@ -98,19 +99,18 @@ int ExUtilInitCommandLineArguments(int argc, const char* argv[],
     return 0;
 #endif
 
-    if (!ExUtilReadFileToWebPData(argv[0], &args->argv_data_)) {
+    if (!ExUtilReadFileToWebPData(argv[0], &args->argv_data)) {
       return 0;
     }
-    args->own_argv_ = 1;
-    args->argv_ = (const char**)WebPMalloc(MAX_ARGC * sizeof(*args->argv_));
-    if (args->argv_ == NULL) {
+    args->own_argv = 1;
+    args->argv = (const char**)WebPMalloc(MAX_ARGC * sizeof(*args->argv));
+    if (args->argv == NULL) {
       ExUtilDeleteCommandLineArguments(args);
       return 0;
     }
 
     argc = 0;
-    for (cur = strtok((char*)args->argv_data_.bytes, sep);
-         cur != NULL;
+    for (cur = strtok((char*)args->argv_data.bytes, sep); cur != NULL;
          cur = strtok(NULL, sep)) {
       if (argc == MAX_ARGC) {
         fprintf(stderr, "ERROR: Arguments limit %d reached\n", MAX_ARGC);
@@ -118,9 +118,9 @@ int ExUtilInitCommandLineArguments(int argc, const char* argv[],
         return 0;
       }
       assert(strlen(cur) != 0);
-      args->argv_[argc++] = cur;
+      args->argv[argc++] = cur;
     }
-    args->argc_ = argc;
+    args->argc = argc;
   }
   return 1;
 }

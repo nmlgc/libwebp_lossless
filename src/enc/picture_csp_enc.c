@@ -12,26 +12,22 @@
 // Author: Skal (pascal.massimino@gmail.com)
 
 #include <assert.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include "src/dsp/cpu.h"
+#include "src/dsp/dsp.h"
+#include "src/dsp/lossless.h"
+#include "src/dsp/yuv.h"
 #include "src/enc/vp8i_enc.h"
 #include "src/utils/random_utils.h"
 #include "src/utils/utils.h"
-#include "src/dsp/dsp.h"
-#include "src/dsp/lossless.h"
-#include "src/dsp/cpu.h"
+#include "src/webp/encode.h"
+#include "src/webp/types.h"
 
 #if defined(WEBP_USE_THREAD) && !defined(_WIN32)
 #include <pthread.h>
-#endif
-
-#ifdef WORDS_BIGENDIAN
-// uint32_t 0xff000000 is 0xff,00,00,00 in memory
-#define CHANNEL_OFFSET(i) (i)
-#else
-// uint32_t 0xff000000 is 0x00,00,00,ff in memory
-#define CHANNEL_OFFSET(i) (3-(i))
 #endif
 
 #define ALPHA_OFFSET CHANNEL_OFFSET(0)
@@ -62,21 +58,20 @@ int WebPPictureHasTransparency(const WebPPicture* picture) {
   if (picture->use_argb) {
     if (picture->argb != NULL) {
       return CheckNonOpaque((const uint8_t*)picture->argb + ALPHA_OFFSET,
-                            picture->width, picture->height,
-                            4, picture->argb_stride * sizeof(*picture->argb));
+                            picture->width, picture->height, 4,
+                            picture->argb_stride * sizeof(*picture->argb));
     }
     return 0;
   }
-  return CheckNonOpaque(picture->a, picture->width, picture->height,
-                        1, picture->a_stride);
+  return CheckNonOpaque(picture->a, picture->width, picture->height, 1,
+                        picture->a_stride);
 }
 
 //------------------------------------------------------------------------------
 // automatic import / conversion
 
-static int Import(WebPPicture* const picture,
-                  const uint8_t* rgb, int rgb_stride,
-                  int step, int swap_rb, int import_alpha) {
+static int Import(WebPPicture* const picture, const uint8_t* rgb,
+                  int rgb_stride, int step, int swap_rb, int import_alpha) {
   int y;
   // swap_rb -> b,g,r,a , !swap_rb -> r,g,b,a
   const uint8_t* r_ptr = rgb + (swap_rb ? 2 : 0);
@@ -141,46 +136,45 @@ static int Import(WebPPicture* const picture,
 
 #if !defined(WEBP_REDUCE_CSP)
 
-int WebPPictureImportBGR(WebPPicture* picture,
-                         const uint8_t* bgr, int bgr_stride) {
+int WebPPictureImportBGR(WebPPicture* picture, const uint8_t* bgr,
+                         int bgr_stride) {
   return (picture != NULL && bgr != NULL)
              ? Import(picture, bgr, bgr_stride, 3, 1, 0)
              : 0;
 }
 
-int WebPPictureImportBGRA(WebPPicture* picture,
-                          const uint8_t* bgra, int bgra_stride) {
+int WebPPictureImportBGRA(WebPPicture* picture, const uint8_t* bgra,
+                          int bgra_stride) {
   return (picture != NULL && bgra != NULL)
              ? Import(picture, bgra, bgra_stride, 4, 1, 1)
              : 0;
 }
 
-
-int WebPPictureImportBGRX(WebPPicture* picture,
-                          const uint8_t* bgrx, int bgrx_stride) {
+int WebPPictureImportBGRX(WebPPicture* picture, const uint8_t* bgrx,
+                          int bgrx_stride) {
   return (picture != NULL && bgrx != NULL)
              ? Import(picture, bgrx, bgrx_stride, 4, 1, 0)
              : 0;
 }
 
-#endif   // WEBP_REDUCE_CSP
+#endif  // WEBP_REDUCE_CSP
 
-int WebPPictureImportRGB(WebPPicture* picture,
-                         const uint8_t* rgb, int rgb_stride) {
+int WebPPictureImportRGB(WebPPicture* picture, const uint8_t* rgb,
+                         int rgb_stride) {
   return (picture != NULL && rgb != NULL)
              ? Import(picture, rgb, rgb_stride, 3, 0, 0)
              : 0;
 }
 
-int WebPPictureImportRGBA(WebPPicture* picture,
-                          const uint8_t* rgba, int rgba_stride) {
+int WebPPictureImportRGBA(WebPPicture* picture, const uint8_t* rgba,
+                          int rgba_stride) {
   return (picture != NULL && rgba != NULL)
              ? Import(picture, rgba, rgba_stride, 4, 0, 1)
              : 0;
 }
 
-int WebPPictureImportRGBX(WebPPicture* picture,
-                          const uint8_t* rgbx, int rgbx_stride) {
+int WebPPictureImportRGBX(WebPPicture* picture, const uint8_t* rgbx,
+                          int rgbx_stride) {
   return (picture != NULL && rgbx != NULL)
              ? Import(picture, rgbx, rgbx_stride, 4, 0, 0)
              : 0;

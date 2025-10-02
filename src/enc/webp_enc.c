@@ -12,13 +12,15 @@
 // Author: Skal (pascal.massimino@gmail.com)
 
 #include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "src/enc/vp8i_enc.h"
 #include "src/enc/vp8li_enc.h"
 #include "src/utils/utils.h"
+#include "src/webp/encode.h"
+#include "src/webp/types.h"
 
 //------------------------------------------------------------------------------
 
@@ -39,8 +41,8 @@ int WebPEncodingSetError(const WebPPicture* const pic,
   return 0;
 }
 
-int WebPReportProgress(const WebPPicture* const pic,
-                       int percent, int* const percent_store) {
+int WebPReportProgress(const WebPPicture* const pic, int percent,
+                       int* const percent_store) {
   if (percent_store != NULL && percent != *percent_store) {
     *percent_store = percent;
     if (pic->progress_hook && !pic->progress_hook(percent, pic)) {
@@ -57,7 +59,7 @@ int WebPEncode(const WebPConfig* config, WebPPicture* pic) {
   if (pic == NULL) return 0;
 
   pic->error_code = VP8_ENC_OK;  // all ok so far
-  if (config == NULL) {  // bad params
+  if (config == NULL) {          // bad params
     return WebPEncodingSetError(pic, VP8_ENC_ERROR_NULL_PARAMETER);
   }
   if (!WebPValidateConfig(config)) {

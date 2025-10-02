@@ -13,8 +13,8 @@
 #ifndef WEBP_EXAMPLES_EXAMPLE_UTIL_H_
 #define WEBP_EXAMPLES_EXAMPLE_UTIL_H_
 
-#include "webp/types.h"
 #include "webp/mux_types.h"
+#include "webp/types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,10 +45,10 @@ int ExUtilReadFileToWebPData(const char* const filename,
 // Command-line arguments
 
 typedef struct {
-  int argc_;
-  const char** argv_;
-  WebPData argv_data_;
-  int own_argv_;
+  int argc;
+  const char** argv;
+  WebPData argv_data;
+  int own_argv;
 } CommandLineArguments;
 
 // Initializes the structure from the command-line parameters. If there is
@@ -64,7 +64,7 @@ int ExUtilInitCommandLineArguments(int argc, const char* argv[],
 void ExUtilDeleteCommandLineArguments(CommandLineArguments* const args);
 
 #ifdef __cplusplus
-}    // extern "C"
+}  // extern "C"
 #endif
 
 #endif  // WEBP_EXAMPLES_EXAMPLE_UTIL_H_

@@ -46,6 +46,10 @@ option(WEBP_USE_THREAD "Enable threading support" ON)
 option(WEBP_NEAR_LOSSLESS "Enable near-lossless encoding" ON)
 option(WEBP_ENABLE_SWAP_16BIT_CSP "Enable byte swap for 16 bit colorspaces."
        OFF)
+option(
+  WEBP_ENABLE_FBOUNDS_SAFETY
+  "Enable -fbounds-safety for the part of the codebase which supports it. This expects an experimental toolchain."
+  OFF)
 set(WEBP_BITTRACE "0" CACHE STRING "Bit trace mode (0=none, 1=bit, 2=bytes)")
 set_property(CACHE WEBP_BITTRACE PROPERTY STRINGS 0 1 2)
 option(WEBP_ENABLE_WUNUSED_RESULT "Add [[nodiscard]] to some functions. \
@@ -83,6 +87,15 @@ if(WEBP_BUILD_WEBP_JS)
   if(WEBP_ENABLE_SIMD)
     message(NOTICE
             "wasm2js does not support SIMD, disabling webp.js generation.")
+  endif()
+
+  if(NOT EMSCRIPTEN_VERSION)
+    message(
+      WARNING
+        "EMSCRIPTEN_VERSION not detected!\n"
+        "WEBP_BUILD_WEBP_JS is only supported with emcmake/emmake.\n"
+        "The build may fail if those tools are not used. See webp_js/README.md."
+    )
   endif()
 endif()
 
@@ -132,6 +145,16 @@ endif()
 
 if(WIN32 AND BUILD_SHARED_LIBS)
   add_definitions(-DWEBP_DLL)
+endif()
+
+# Compatibility with autoconf configure script's way of setting this
+if(CMAKE_C_BYTE_ORDER STREQUAL "BIG_ENDIAN")
+  set(WORDS_BIGENDIAN TRUE)
+elseif(CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
+  set(WORDS_BIGENDIAN FALSE)
+else()
+  set(WORDS_BIGENDIAN FALSE)
+  message(WARNING "Endianness could not be determined.")
 endif()
 
 # pkg-config variables used by *.pc.in.
@@ -371,6 +394,13 @@ target_include_directories(webputils PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
                                              ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(webp $<TARGET_OBJECTS:webpdecode> $<TARGET_OBJECTS:webpdsp>
                  $<TARGET_OBJECTS:webpencode> $<TARGET_OBJECTS:webputils>)
+if(WEBP_ENABLE_FBOUNDS_SAFETY)
+  # Enable -fbounds-safety only for webputils for now.
+  add_definitions(-DWEBP_SUPPORT_FBOUNDS_SAFETY=1)
+  target_compile_options(webputils PRIVATE -fbounds-safety)
+  target_compile_options(webputilsdecode PRIVATE -fbounds-safety)
+endif()
+
 if(XCODE)
   libwebp_add_stub_file(webp)
 endif()

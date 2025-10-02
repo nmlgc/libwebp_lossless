@@ -30,6 +30,8 @@
 #include "./unicode.h"
 #include "webp/encode.h"
 #include "webp/mux.h"
+#include "webp/mux_types.h"
+#include "webp/types.h"
 
 //------------------------------------------------------------------------------
 
@@ -40,12 +42,15 @@ static void Help(void) {
 
   printf("File-level options (only used at the start of compression):\n");
   printf(" -min_size ............ minimize size\n");
-  printf(" -kmax <int> .......... maximum number of frame between key-frames\n"
-         "                        (0=only keyframes)\n");
-  printf(" -kmin <int> .......... minimum number of frame between key-frames\n"
-         "                        (0=disable key-frames altogether)\n");
-  printf(" -near_lossless <int> . use near-lossless image preprocessing\n"
-         "                        (0..100=off), default=100\n");
+  printf(
+      " -kmax <int> .......... maximum number of frame between key-frames\n"
+      "                        (0=only keyframes)\n");
+  printf(
+      " -kmin <int> .......... minimum number of frame between key-frames\n"
+      "                        (0=disable key-frames altogether)\n");
+  printf(
+      " -near_lossless <int> . use near-lossless image preprocessing\n"
+      "                        (0..100=off), default=100\n");
   printf(" -loop <int> .......... loop count (default: 0, = infinite loop)\n");
   printf(" -v ................... verbose mode\n");
   printf(" -h ................... this help\n");
@@ -56,20 +61,25 @@ static void Help(void) {
   printf(" -d <int> ............. frame duration in ms (default: 100)\n");
   printf(" -lossless ............ use lossless mode (default)\n");
   printf(" -q <float> ........... quality\n");
-  printf(" -m <int> ............. compression method (0=fast, 6=slowest), "
-         "default=4\n");
-  printf(" -exact, -noexact ..... preserve or alter RGB values in transparent "
-                                  "area\n"
-         "                        (default: -noexact, may cause artifacts\n"
-         "                                  with lossy animations)\n");
+  printf(
+      " -m <int> ............. compression method (0=fast, 6=slowest), "
+      "default=4\n");
+  printf(
+      " -exact, -noexact ..... preserve or alter RGB values in transparent "
+      "area\n"
+      "                        (default: -noexact, may cause artifacts\n"
+      "                                  with lossy animations)\n");
 
   printf("\n");
-  printf("example: img2webp -loop 2 in0.png in1.jpg\n"
-         "                  -d 80 in2.tiff -o out.webp\n");
-  printf("\nNote: if a single file name is passed as the argument, the "
-         "arguments will be\n");
-  printf("tokenized from this file. The file name must not start with "
-         "the character '-'.\n");
+  printf(
+      "example: img2webp -loop 2 in0.png in1.jpg\n"
+      "                  -d 80 in2.tiff -o out.webp\n");
+  printf(
+      "\nNote: if a single file name is passed as the argument, the "
+      "arguments will be\n");
+  printf(
+      "tokenized from this file. The file name must not start with "
+      "the character '-'.\n");
   printf("\nSupported input formats:\n  %s\n",
          WebPGetEnabledInputFileFormats());
 }
@@ -119,7 +129,7 @@ static int SetLoopCount(int loop_count, WebPData* const webp_data) {
     ok = (err == WEBP_MUX_OK);
   }
 
- End:
+End:
   WebPMuxDelete(mux);
   if (!ok) {
     fprintf(stderr, "Error during loop-count setting\n");
@@ -154,12 +164,11 @@ int main(int argc, const char* argv[]) {
   ok = ExUtilInitCommandLineArguments(argc - 1, argv + 1, &cmd_args);
   if (!ok) FREE_WARGV_AND_RETURN(EXIT_FAILURE);
 
-  argc = cmd_args.argc_;
-  argv = cmd_args.argv_;
+  argc = cmd_args.argc;
+  argv = cmd_args.argv;
 
   WebPDataInit(&webp_data);
-  if (!WebPAnimEncoderOptionsInit(&anim_config) ||
-      !WebPConfigInit(&config) ||
+  if (!WebPAnimEncoderOptionsInit(&anim_config) || !WebPConfigInit(&config) ||
       !WebPPictureInit(&pic)) {
     fprintf(stderr, "Library version mismatch!\n");
     ok = 0;
@@ -209,7 +218,7 @@ int main(int argc, const char* argv[]) {
       }
       ok = !parse_error;
       if (!ok) goto End;
-      argv[c] = NULL;   // mark option as 'parsed' during 1st pass
+      argv[c] = NULL;  // mark option as 'parsed' during 1st pass
     } else {
       have_input |= 1;
     }
@@ -226,7 +235,7 @@ int main(int argc, const char* argv[]) {
   config.lossless = 1;
   for (c = 0; ok && c < argc; ++c) {
     if (argv[c] == NULL) continue;
-    if (argv[c][0] == '-') {    // parse local options
+    if (argv[c][0] == '-') {  // parse local options
       int parse_error = 0;
       if (!strcmp(argv[c], "-lossless")) {
         if (!anim_config.lossy_22) config.lossless = 1;
@@ -245,7 +254,7 @@ int main(int argc, const char* argv[]) {
       } else if (!strcmp(argv[c], "-noexact")) {
         config.exact = 0;
       } else {
-        parse_error = 1;   // shouldn't be here.
+        parse_error = 1;  // shouldn't be here.
         fprintf(stderr, "Unknown option [%s]\n", argv[c]);
       }
       ok = !parse_error;
@@ -268,7 +277,7 @@ int main(int argc, const char* argv[]) {
     if (!ok) goto End;
 
     if (enc == NULL) {
-      width  = pic.width;
+      width = pic.width;
       height = pic.height;
       enc = WebPAnimEncoderNew(width, height, &anim_config);
       ok = (enc != NULL);
@@ -280,8 +289,9 @@ int main(int argc, const char* argv[]) {
     if (ok) {
       ok = (width == pic.width && height == pic.height);
       if (!ok) {
-        fprintf(stderr, "Frame #%d dimension mismatched! "
-                        "Got %d x %d. Was expecting %d x %d.\n",
+        fprintf(stderr,
+                "Frame #%d dimension mismatched! "
+                "Got %d x %d. Was expecting %d x %d.\n",
                 pic_num, pic.width, pic.height, width, height);
       }
     }
@@ -296,8 +306,8 @@ int main(int argc, const char* argv[]) {
     if (!ok) goto End;
 
     if (verbose) {
-      WFPRINTF(stderr, "Added frame #%3d at time %4d (file: %s)\n",
-               pic_num, timestamp_ms, GET_WARGV_SHIFTED(argv, c));
+      WFPRINTF(stderr, "Added frame #%3d at time %4d (file: %s)\n", pic_num,
+               timestamp_ms, GET_WARGV_SHIFTED(argv, c));
     }
     timestamp_ms += duration;
     ++pic_num;
@@ -305,8 +315,10 @@ int main(int argc, const char* argv[]) {
 
   for (c = last_input_index + 1; c < argc; ++c) {
     if (argv[c] != NULL) {
-      fprintf(stderr, "Warning: unused option [%s]!"
-                      " Frame options go before the input frame.\n", argv[c]);
+      fprintf(stderr,
+              "Warning: unused option [%s]!"
+              " Frame options go before the input frame.\n",
+              argv[c]);
     }
   }
 
@@ -317,7 +329,7 @@ int main(int argc, const char* argv[]) {
     fprintf(stderr, "Error during final animation assembly.\n");
   }
 
- End:
+End:
   // free resources
   WebPAnimEncoderDelete(enc);
 
@@ -335,8 +347,8 @@ int main(int argc, const char* argv[]) {
   }
 
   if (ok) {
-    fprintf(stderr, "[%d frames, %u bytes].\n",
-            pic_num, (unsigned int)webp_data.size);
+    fprintf(stderr, "[%d frames, %u bytes].\n", pic_num,
+            (unsigned int)webp_data.size);
   }
   WebPDataClear(&webp_data);
   ExUtilDeleteCommandLineArguments(&cmd_args);

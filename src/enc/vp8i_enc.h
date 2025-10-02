@@ -14,10 +14,12 @@
 #ifndef WEBP_ENC_VP8I_ENC_H_
 #define WEBP_ENC_VP8I_ENC_H_
 
-#include <string.h>     // for memcpy()
+#include <string.h>  // for memcpy()
+
 #include "src/dsp/dsp.h"
 #include "src/utils/thread_utils.h"
 #include "src/webp/encode.h"
+#include "src/webp/types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,19 +30,19 @@ extern "C" {
 
 // version numbers
 #define ENC_MAJ_VERSION 1
-#define ENC_MIN_VERSION 5
+#define ENC_MIN_VERSION 6
 #define ENC_REV_VERSION 0
 
 //------------------------------------------------------------------------------
 // internal functions. Not public.
 
-  // in webpenc.c
+// in webpenc.c
 // Assign an error code to a picture. Return false for convenience.
 int WebPEncodingSetError(const WebPPicture* const pic, WebPEncodingError error);
-int WebPReportProgress(const WebPPicture* const pic,
-                       int percent, int* const percent_store);
+int WebPReportProgress(const WebPPicture* const pic, int percent,
+                       int* const percent_store);
 
-  // misc utils for picture_*.c:
+// misc utils for picture_*.c:
 
 // Returns true if 'picture' is non-NULL and dimensions/colorspace are within
 // their valid ranges. If returning false, the 'error_code' in 'picture' is
@@ -62,7 +64,7 @@ void WebPReplaceTransparentPixels(WebPPicture* const pic, uint32_t color);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-}    // extern "C"
+}  // extern "C"
 #endif
 
 #endif  // WEBP_ENC_VP8I_ENC_H_

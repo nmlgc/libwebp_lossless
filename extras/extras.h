@@ -11,6 +11,8 @@
 #ifndef WEBP_EXTRAS_EXTRAS_H_
 #define WEBP_EXTRAS_EXTRAS_H_
 
+#include <stddef.h>
+
 #include "webp/types.h"
 
 #ifdef __cplusplus
@@ -19,7 +21,7 @@ extern "C" {
 
 #include "webp/encode.h"
 
-#define WEBP_EXTRAS_ABI_VERSION 0x0003    // MAJOR(8b) + MINOR(8b)
+#define WEBP_EXTRAS_ABI_VERSION 0x0003  // MAJOR(8b) + MINOR(8b)
 
 //------------------------------------------------------------------------------
 
@@ -46,10 +48,10 @@ WEBP_EXTERN int WebPImportRGB4444(const uint8_t* rgb4444, WebPPicture* pic);
 // MAX_PALETTE_SIZE. 'pic' must have been initialized. Its content, if any,
 // will be discarded. Returns 'false' in case of error, or if indexed[] contains
 // invalid indices.
-WEBP_EXTERN int
-WebPImportColorMappedARGB(const uint8_t* indexed, int indexed_stride,
-                          const uint32_t palette[], int palette_size,
-                          WebPPicture* pic);
+WEBP_EXTERN int WebPImportColorMappedARGB(const uint8_t* indexed,
+                                          int indexed_stride,
+                                          const uint32_t palette[],
+                                          int palette_size, WebPPicture* pic);
 
 // Convert the ARGB content of 'pic' from associated to unassociated.
 // 'pic' can be for instance the result of calling of some WebPPictureImportXXX
@@ -71,7 +73,7 @@ WEBP_EXTERN int VP8EstimateQuality(const uint8_t* const data, size_t size);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-}    // extern "C"
+}  // extern "C"
 #endif
 
 #endif  // WEBP_EXTRAS_EXTRAS_H_

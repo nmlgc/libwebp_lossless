@@ -12,9 +12,14 @@
 // Author: Skal (pascal.massimino@gmail.com)
 
 #include <assert.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "src/enc/vp8i_enc.h"
+#include "src/dsp/dsp.h"
 #include "src/dsp/yuv.h"
+#include "src/enc/vp8i_enc.h"
+#include "src/webp/encode.h"
+#include "src/webp/types.h"
 
 //------------------------------------------------------------------------------
 // Helper: clean up fully transparent area to help compressibility.
@@ -23,7 +28,7 @@ void WebPReplaceTransparentPixels(WebPPicture* const pic, uint32_t color) {
   if (pic != NULL && pic->use_argb) {
     int y = pic->height;
     uint32_t* argb = pic->argb;
-    color &= 0xffffffu;   // force alpha=0
+    color &= 0xffffffu;  // force alpha=0
     WebPInitAlphaProcessing();
     while (y-- > 0) {
       WebPAlphaReplace(argb, pic->width, color);
@@ -36,9 +41,9 @@ void WebPReplaceTransparentPixels(WebPPicture* const pic, uint32_t color) {
 // Blend color and remove transparency info
 
 #define BLEND(V0, V1, ALPHA) \
-    ((((V0) * (255 - (ALPHA)) + (V1) * (ALPHA)) * 0x101 + 256) >> 16)
+  ((((V0) * (255 - (ALPHA)) + (V1) * (ALPHA)) * 0x101 + 256) >> 16)
 #define BLEND_10BIT(V0, V1, ALPHA) \
-    ((((V0) * (1020 - (ALPHA)) + (V1) * (ALPHA)) * 0x101 + 1024) >> 18)
+  ((((V0) * (1020 - (ALPHA)) + (V1) * (ALPHA)) * 0x101 + 1024) >> 18)
 
 static WEBP_INLINE uint32_t MakeARGB32(int r, int g, int b) {
   return (0xff000000u | (r << 16) | (g << 8) | b);
@@ -62,7 +67,7 @@ void WebPBlendAlpha(WebPPicture* picture, uint32_t background_rgb) {
     uint8_t* u_ptr = picture->u;
     uint8_t* v_ptr = picture->v;
     uint8_t* a_ptr = picture->a;
-    if (!has_alpha || a_ptr == NULL) return;    // nothing to do
+    if (!has_alpha || a_ptr == NULL) return;  // nothing to do
     for (y = 0; y < picture->height; ++y) {
       // Luma blending
       for (x = 0; x < picture->width; ++x) {
@@ -78,9 +83,8 @@ void WebPBlendAlpha(WebPPicture* picture, uint32_t background_rgb) {
         for (x = 0; x < uv_width; ++x) {
           // Average four alpha values into a single blending weight.
           // TODO(skal): might lead to visible contouring. Can we do better?
-          const uint32_t alpha =
-              a_ptr[2 * x + 0] + a_ptr[2 * x + 1] +
-              a_ptr2[2 * x + 0] + a_ptr2[2 * x + 1];
+          const uint32_t alpha = a_ptr[2 * x + 0] + a_ptr[2 * x + 1] +
+                                 a_ptr2[2 * x + 0] + a_ptr2[2 * x + 1];
           u_ptr[x] = BLEND_10BIT(U0, u_ptr[x], alpha);
           v_ptr[x] = BLEND_10BIT(V0, v_ptr[x], alpha);
         }
@@ -106,8 +110,8 @@ void WebPBlendAlpha(WebPPicture* picture, uint32_t background_rgb) {
         if (alpha != 0xff) {
           if (alpha > 0) {
             int r = (argb[x] >> 16) & 0xff;
-            int g = (argb[x] >>  8) & 0xff;
-            int b = (argb[x] >>  0) & 0xff;
+            int g = (argb[x] >> 8) & 0xff;
+            int b = (argb[x] >> 0) & 0xff;
             r = BLEND(red, r, alpha);
             g = BLEND(green, g, alpha);
             b = BLEND(blue, b, alpha);
