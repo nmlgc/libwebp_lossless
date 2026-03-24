@@ -70,10 +70,11 @@ for fuzz_main_file in $FUZZ_TEST_BINARIES_OUT_PATHS; do
     TARGET_FUZZER="${fuzz_basename}@$fuzz_entrypoint"
     # Write executer script
     cat << EOF > $OUT/$TARGET_FUZZER
-#!/bin/sh
+#!/bin/bash
 # LLVMFuzzerTestOneInput for fuzzer detection.
 this_dir=\$(dirname "\$0")
 export TEST_DATA_DIRS=\$this_dir/corpus
+export ASAN_OPTIONS="\${ASAN_OPTIONS}:allocator_may_return_null=1"
 chmod +x \$this_dir/$fuzz_basename
 \$this_dir/$fuzz_basename --fuzz=$fuzz_entrypoint -- \$@
 chmod -x \$this_dir/$fuzz_basename

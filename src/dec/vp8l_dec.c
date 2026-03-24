@@ -34,6 +34,8 @@
 #include "src/webp/format_constants.h"
 #include "src/webp/types.h"
 
+WEBP_ASSUME_UNSAFE_INDEXABLE_ABI
+
 #define NUM_ARGB_CACHE_ROWS 16
 
 static const int kCodeLengthLiterals = 16;
@@ -102,7 +104,8 @@ static int DecodeImageStream(int xsize, int ysize, int is_level0,
 
 //------------------------------------------------------------------------------
 
-int VP8LCheckSignature(const uint8_t* const data, size_t size) {
+int VP8LCheckSignature(const uint8_t* const WEBP_COUNTED_BY(size) data,
+                       size_t size) {
   return (size >= VP8L_FRAME_HEADER_SIZE && data[0] == VP8L_MAGIC_BYTE &&
           (data[4] >> 5) == 0);  // version
 }
@@ -117,8 +120,9 @@ static int ReadImageInfo(VP8LBitReader* const br, int* const width,
   return !br->eos;
 }
 
-int VP8LGetInfo(const uint8_t* data, size_t data_size, int* const width,
-                int* const height, int* const has_alpha) {
+int VP8LGetInfo(const uint8_t* WEBP_COUNTED_BY(data_size) data,
+                size_t data_size, int* const width, int* const height,
+                int* const has_alpha) {
   if (data == NULL || data_size < VP8L_FRAME_HEADER_SIZE) {
     return 0;  // not enough data
   } else if (!VP8LCheckSignature(data, data_size)) {
@@ -246,10 +250,14 @@ static int ReadHuffmanCodeLengths(VP8LDecoder* const dec,
   int max_symbol;
   int prev_code_len = DEFAULT_CODE_LENGTH;
   HuffmanTables tables;
+  const int* WEBP_BIDI_INDEXABLE const bounded_code_lengths =
+      WEBP_UNSAFE_FORGE_BIDI_INDEXABLE(
+          const int*, code_length_code_lengths,
+          NUM_CODE_LENGTH_CODES * sizeof(*code_length_code_lengths));
 
   if (!VP8LHuffmanTablesAllocate(1 << LENGTHS_TABLE_BITS, &tables) ||
-      !VP8LBuildHuffmanTable(&tables, LENGTHS_TABLE_BITS,
-                             code_length_code_lengths, NUM_CODE_LENGTH_CODES)) {
+      !VP8LBuildHuffmanTable(&tables, LENGTHS_TABLE_BITS, bounded_code_lengths,
+                             NUM_CODE_LENGTH_CODES)) {
     goto End;
   }
 
@@ -307,7 +315,7 @@ static int ReadHuffmanCode(int alphabet_size, VP8LDecoder* const dec,
   VP8LBitReader* const br = &dec->br;
   const int simple_code = VP8LReadBits(br, 1);
 
-  memset(code_lengths, 0, alphabet_size * sizeof(*code_lengths));
+  WEBP_UNSAFE_MEMSET(code_lengths, 0, alphabet_size * sizeof(*code_lengths));
 
   if (simple_code) {  // Read symbols, codes & code lengths directly.
     const int num_symbols = VP8LReadBits(br, 1) + 1;
@@ -336,8 +344,11 @@ static int ReadHuffmanCode(int alphabet_size, VP8LDecoder* const dec,
 
   ok = ok && !br->eos;
   if (ok) {
-    size = VP8LBuildHuffmanTable(table, HUFFMAN_TABLE_BITS, code_lengths,
-                                 alphabet_size);
+    const int* WEBP_BIDI_INDEXABLE const bounded_code_lengths =
+        WEBP_UNSAFE_FORGE_BIDI_INDEXABLE(const int*, code_lengths,
+                                         alphabet_size * sizeof(int));
+    size = VP8LBuildHuffmanTable(table, HUFFMAN_TABLE_BITS,
+                                 bounded_code_lengths, alphabet_size);
   }
   if (!ok || size == 0) {
     return VP8LSetError(dec, VP8_STATUS_BITSTREAM_ERROR);
@@ -398,7 +409,8 @@ static int ReadHuffmanCodes(VP8LDecoder* const dec, int xsize, int ysize,
       }
       // -1 means a value is unmapped, and therefore unused in the Huffman
       // image.
-      memset(mapping, 0xff, num_htree_groups_max * sizeof(*mapping));
+      WEBP_UNSAFE_MEMSET(mapping, 0xff,
+                         num_htree_groups_max * sizeof(*mapping));
       for (num_htree_groups = 0, i = 0; i < huffman_pixs; ++i) {
         // Get the current mapping for the group and remap the Huffman image.
         int* const mapped_group = &mapping[huffman_image[i]];
@@ -550,13 +562,15 @@ static int AllocateAndInitRescaler(VP8LDecoder* const dec, VP8Io* const io) {
   const int in_height = io->mb_h;
   const int out_height = io->scaled_height;
   const uint64_t work_size = 2 * num_channels * (uint64_t)out_width;
-  rescaler_t* work;  // Rescaler work area.
+  rescaler_t* WEBP_BIDI_INDEXABLE work;  // Rescaler work area.
   const uint64_t scaled_data_size = (uint64_t)out_width;
-  uint32_t* scaled_data;  // Temporary storage for scaled BGRA data.
+  uint32_t* WEBP_BIDI_INDEXABLE
+      scaled_data;  // Temporary storage for scaled BGRA data.
   const uint64_t memory_size = sizeof(*dec->rescaler) +
                                work_size * sizeof(*work) +
                                scaled_data_size * sizeof(*scaled_data);
-  uint8_t* memory = (uint8_t*)WebPSafeMalloc(memory_size, sizeof(*memory));
+  uint8_t* WEBP_BIDI_INDEXABLE memory =
+      (uint8_t*)WebPSafeMalloc(memory_size, sizeof(*memory));
   if (memory == NULL) {
     return VP8LSetError(dec, VP8_STATUS_OUT_OF_MEMORY);
   }
@@ -649,19 +663,19 @@ static void ConvertToYUVA(const uint32_t* const src, int width, int y_pos,
   const WebPYUVABuffer* const buf = &output->u.YUVA;
 
   // first, the luma plane
-  WebPConvertARGBToY(src, buf->y + y_pos * buf->y_stride, width);
+  WebPConvertARGBToY(src, buf->y + (ptrdiff_t)y_pos * buf->y_stride, width);
 
   // then U/V planes
   {
-    uint8_t* const u = buf->u + (y_pos >> 1) * buf->u_stride;
-    uint8_t* const v = buf->v + (y_pos >> 1) * buf->v_stride;
+    uint8_t* const u = buf->u + (ptrdiff_t)(y_pos >> 1) * buf->u_stride;
+    uint8_t* const v = buf->v + (ptrdiff_t)(y_pos >> 1) * buf->v_stride;
     // even lines: store values
     // odd lines: average with previous values
     WebPConvertARGBToUV(src, u, v, width, !(y_pos & 1));
   }
   // Lastly, store alpha if needed.
   if (buf->a != NULL) {
-    uint8_t* const a = buf->a + y_pos * buf->a_stride;
+    uint8_t* const a = buf->a + (ptrdiff_t)y_pos * buf->a_stride;
 #if defined(WORDS_BIGENDIAN)
     WebPExtractAlpha((uint8_t*)src + 0, 0, width, 1, a, 0);
 #else
@@ -698,7 +712,7 @@ static int EmitRescaledRowsYUVA(const VP8LDecoder* const dec, uint8_t* in,
         WebPRescalerImport(dec->rescaler, lines_left, in, in_stride);
     assert(lines_imported == needed_lines);
     num_lines_in += lines_imported;
-    in += needed_lines * in_stride;
+    in += (ptrdiff_t)needed_lines * in_stride;
     y_pos += ExportYUVA(dec, y_pos);
   }
   return y_pos;
@@ -725,9 +739,9 @@ static int EmitRowsYUVA(const uint8_t* const in, const VP8Io* const io,
   const int uv_stride = dec->output->u.YUVA.u_stride;
   const int a_stride = dec->output->u.YUVA.a_stride;
   uint8_t* dst_a = dec->output->u.YUVA.a;
-  uint8_t* dst_y = dec->output->u.YUVA.y + y_pos * y_stride;
-  uint8_t* dst_u = dec->output->u.YUVA.u + (y_pos >> 1) * uv_stride;
-  uint8_t* dst_v = dec->output->u.YUVA.v + (y_pos >> 1) * uv_stride;
+  uint8_t* dst_y = dec->output->u.YUVA.y + (ptrdiff_t)y_pos * y_stride;
+  uint8_t* dst_u = dec->output->u.YUVA.u + (ptrdiff_t)(y_pos >> 1) * uv_stride;
+  uint8_t* dst_v = dec->output->u.YUVA.v + (ptrdiff_t)(y_pos >> 1) * uv_stride;
   const uint8_t* r_ptr = in + CHANNEL_OFFSET(1);
   const uint8_t* g_ptr = in + CHANNEL_OFFSET(2);
   const uint8_t* b_ptr = in + CHANNEL_OFFSET(3);
@@ -741,7 +755,7 @@ static int EmitRowsYUVA(const uint8_t* const in, const VP8Io* const io,
   num_rows &= ~1;
 
   if (dst_a) {
-    dst_a += y_pos * a_stride;
+    dst_a += (ptrdiff_t)y_pos * a_stride;
     a_ptr = in + CHANNEL_OFFSET(0);
     has_alpha = CheckNonOpaque(a_ptr, width, num_rows, in_stride);
   }
@@ -754,15 +768,15 @@ static int EmitRowsYUVA(const uint8_t* const in, const VP8Io* const io,
   if (y_pos_final == io->crop_bottom - io->crop_top && y_pos < y_pos_final) {
     assert(y_pos + 1 == y_pos_final);
     // If we output the last line of an image with odd height.
-    dst_y += num_rows * y_stride;
-    dst_u += (num_rows >> 1) * uv_stride;
-    dst_v += (num_rows >> 1) * uv_stride;
-    r_ptr += num_rows * in_stride;
-    g_ptr += num_rows * in_stride;
-    b_ptr += num_rows * in_stride;
+    dst_y += (ptrdiff_t)num_rows * y_stride;
+    dst_u += (ptrdiff_t)(num_rows >> 1) * uv_stride;
+    dst_v += (ptrdiff_t)(num_rows >> 1) * uv_stride;
+    r_ptr += (ptrdiff_t)num_rows * in_stride;
+    g_ptr += (ptrdiff_t)num_rows * in_stride;
+    b_ptr += (ptrdiff_t)num_rows * in_stride;
     if (dst_a) {
-      dst_a += num_rows * a_stride;
-      a_ptr += num_rows * in_stride;
+      dst_a += (ptrdiff_t)num_rows * a_stride;
+      a_ptr += (ptrdiff_t)num_rows * in_stride;
       has_alpha = CheckNonOpaque(a_ptr, width, /*height=*/1, in_stride);
     }
     WebPImportYUVAFromRGBALastLine(r_ptr, g_ptr, b_ptr, a_ptr, /*step=*/4,
@@ -791,7 +805,7 @@ static int SetCropWindow(VP8Io* const io, int y_start, int y_end,
   if (y_start < io->crop_top) {
     const int delta = io->crop_top - y_start;
     y_start = io->crop_top;
-    *in_data += delta * pixel_stride;
+    *in_data += (ptrdiff_t)delta * pixel_stride;
   }
   if (y_start >= y_end) return 0;  // Crop window is empty.
 
@@ -822,7 +836,10 @@ static WEBP_INLINE HTreeGroup* GetHtreeGroupForPos(VP8LMetadata* const hdr,
 //------------------------------------------------------------------------------
 // Main loop, with custom row-processing function
 
-typedef void (*ProcessRowsFunc)(VP8LDecoder* const dec, int row);
+// If 'wait_for_biggest_batch' is true, wait for enough data to fill the
+// argb_cache as much as possible (usually NUM_ARGB_CACHE_ROWS).
+typedef void (*ProcessRowsFunc)(VP8LDecoder* const dec, int row,
+                                int wait_for_biggest_batch);
 
 static void ApplyInverseTransforms(VP8LDecoder* const dec, int start_row,
                                    int num_rows, const uint32_t* const rows) {
@@ -840,22 +857,32 @@ static void ApplyInverseTransforms(VP8LDecoder* const dec, int start_row,
   }
   if (rows_in != rows_out) {
     // No transform called, hence just copy.
-    memcpy(rows_out, rows_in, cache_pixs * sizeof(*rows_out));
+    WEBP_UNSAFE_MEMCPY(rows_out, rows_in, cache_pixs * sizeof(*rows_out));
   }
 }
 
 // Processes (transforms, scales & color-converts) the rows decoded after the
 // last call.
-static void ProcessRows(VP8LDecoder* const dec, int row) {
+static void ProcessRows(VP8LDecoder* const dec, int row,
+                        int wait_for_biggest_batch) {
   const uint32_t* const rows = dec->pixels + dec->width * dec->last_row;
   int num_rows;
 
   // In case of YUV conversion and if we do not need to get to the last row.
-  if (!WebPIsRGBMode(dec->output->colorspace) && row >= dec->io->crop_top &&
-      row < dec->io->crop_bottom) {
-    // Make sure the number of rows to process is even.
-    if ((row - dec->io->crop_top) % 2 == 1) {
-      --row;
+  if (wait_for_biggest_batch) {
+    // In case of YUV conversion, and if we do not use the whole cropping
+    // region.
+    if (!WebPIsRGBMode(dec->output->colorspace) && row >= dec->io->crop_top &&
+        row < dec->io->crop_bottom) {
+      // Make sure the number of rows to process is even.
+      if ((row - dec->io->crop_top) % 2 != 0) return;
+      // Make sure the cache is as full as possible.
+      if (row % NUM_ARGB_CACHE_ROWS != 0 &&
+          (row + 1) % NUM_ARGB_CACHE_ROWS != 0) {
+        return;
+      }
+    } else {
+      if (row % NUM_ARGB_CACHE_ROWS != 0) return;
     }
   }
   num_rows = row - dec->last_row;
@@ -1009,7 +1036,7 @@ static WEBP_INLINE void CopyBlock8b(uint8_t* const dst, int dist, int length) {
         break;
       case 2:
 #if !defined(WORDS_BIGENDIAN)
-        memcpy(&pattern, src, sizeof(uint16_t));
+        WEBP_UNSAFE_MEMCPY(&pattern, src, sizeof(uint16_t));
 #else
         pattern = ((uint32_t)src[0] << 8) | src[1];
 #endif
@@ -1022,7 +1049,7 @@ static WEBP_INLINE void CopyBlock8b(uint8_t* const dst, int dist, int length) {
 #endif
         break;
       case 4:
-        memcpy(&pattern, src, sizeof(uint32_t));
+        WEBP_UNSAFE_MEMCPY(&pattern, src, sizeof(uint32_t));
         break;
       default:
         goto Copy;
@@ -1031,8 +1058,8 @@ static WEBP_INLINE void CopyBlock8b(uint8_t* const dst, int dist, int length) {
     return;
   }
 Copy:
-  if (dist >= length) {  // no overlap -> use memcpy()
-    memcpy(dst, src, length * sizeof(*dst));
+  if (dist >= length) {  // no overlap -> use WEBP_UNSAFE_MEMCPY()
+    WEBP_UNSAFE_MEMCPY(dst, src, length * sizeof(*dst));
   } else {
     int i;
     for (i = 0; i < length; ++i) dst[i] = src[i];
@@ -1066,11 +1093,11 @@ static WEBP_INLINE void CopyBlock32b(uint32_t* const dst, int dist,
       pattern = (uint64_t)src[0];
       pattern |= pattern << 32;
     } else {
-      memcpy(&pattern, src, sizeof(pattern));
+      WEBP_UNSAFE_MEMCPY(&pattern, src, sizeof(pattern));
     }
     CopySmallPattern32b(src, dst, length, pattern);
   } else if (dist >= length) {  // no overlap
-    memcpy(dst, src, length * sizeof(*dst));
+    WEBP_UNSAFE_MEMCPY(dst, src, length * sizeof(*dst));
   } else {
     int i;
     for (i = 0; i < length; ++i) dst[i] = src[i];
@@ -1249,8 +1276,8 @@ static int DecodeImageData(VP8LDecoder* const dec, uint32_t* const data,
         col = 0;
         ++row;
         if (process_func != NULL) {
-          if (row <= last_row && (row % NUM_ARGB_CACHE_ROWS == 0)) {
-            process_func(dec, row);
+          if (row <= last_row) {
+            process_func(dec, row, /*wait_for_biggest_batch=*/1);
           }
         }
         if (color_cache != NULL) {
@@ -1280,8 +1307,8 @@ static int DecodeImageData(VP8LDecoder* const dec, uint32_t* const data,
         col -= width;
         ++row;
         if (process_func != NULL) {
-          if (row <= last_row && (row % NUM_ARGB_CACHE_ROWS == 0)) {
-            process_func(dec, row);
+          if (row <= last_row) {
+            process_func(dec, row, /*wait_for_biggest_batch=*/1);
           }
         }
       }
@@ -1324,7 +1351,8 @@ static int DecodeImageData(VP8LDecoder* const dec, uint32_t* const data,
   } else if ((dec->incremental && src >= src_last) || !br->eos) {
     // Process the remaining rows corresponding to last row-block.
     if (process_func != NULL) {
-      process_func(dec, row > last_row ? last_row : row);
+      process_func(dec, row > last_row ? last_row : row,
+                   /*wait_for_biggest_batch=*/0);
     }
     dec->status = VP8_STATUS_OK;
     dec->last_pixel = (int)(src - data);  // end-of-scan marker
@@ -1434,7 +1462,7 @@ static int ReadTransform(int* const xsize, int const* ysize,
 
 static void InitMetadata(VP8LMetadata* const hdr) {
   assert(hdr != NULL);
-  memset(hdr, 0, sizeof(*hdr));
+  WEBP_UNSAFE_MEMSET(hdr, 0, sizeof(*hdr));
 }
 
 static void ClearMetadata(VP8LMetadata* const hdr) {
@@ -1634,11 +1662,15 @@ static int AllocateInternalBuffers8b(VP8LDecoder* const dec) {
 //------------------------------------------------------------------------------
 
 // Special row-processing that only stores the alpha data.
-static void ExtractAlphaRows(VP8LDecoder* const dec, int last_row) {
+static void ExtractAlphaRows(VP8LDecoder* const dec, int last_row,
+                             int wait_for_biggest_batch) {
   int cur_row = dec->last_row;
   int num_rows = last_row - cur_row;
   const uint32_t* in = dec->pixels + dec->width * cur_row;
 
+  if (wait_for_biggest_batch && last_row % NUM_ARGB_CACHE_ROWS != 0) {
+    return;
+  }
   assert(last_row <= dec->io->crop_bottom);
   while (num_rows > 0) {
     const int num_rows_to_process =
@@ -1663,7 +1695,8 @@ static void ExtractAlphaRows(VP8LDecoder* const dec, int last_row) {
 }
 
 int VP8LDecodeAlphaHeader(ALPHDecoder* const alph_dec,
-                          const uint8_t* const data, size_t data_size) {
+                          const uint8_t* const WEBP_COUNTED_BY(data_size) data,
+                          size_t data_size) {
   int ok = 0;
   VP8LDecoder* dec = VP8LNew();
 
@@ -1742,7 +1775,12 @@ int VP8LDecodeHeader(VP8LDecoder* const dec, VP8Io* const io) {
 
   dec->io = io;
   dec->status = VP8_STATUS_OK;
-  VP8LInitBitReader(&dec->br, io->data, io->data_size);
+  {
+    const uint8_t* WEBP_BIDI_INDEXABLE const bounded_data =
+        WEBP_UNSAFE_FORGE_BIDI_INDEXABLE(const uint8_t*, io->data,
+                                         io->data_size);
+    VP8LInitBitReader(&dec->br, bounded_data, io->data_size);
+  }
   if (!ReadImageInfo(&dec->br, &width, &height, &has_alpha)) {
     VP8LSetError(dec, VP8_STATUS_BITSTREAM_ERROR);
     goto Error;

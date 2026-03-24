@@ -40,6 +40,8 @@
 #include "src/dsp/dsp.h"
 #include "src/webp/types.h"
 
+WEBP_ASSUME_UNSAFE_INDEXABLE_ABI
+
 // Macros to give the offset of each channel in a uint32_t containing ARGB.
 #ifdef WORDS_BIGENDIAN
 // uint32_t 0xff000000 is 0xff,00,00,00 in memory
@@ -230,6 +232,7 @@ static WEBP_INLINE int VP8RGBToV(int r, int g, int b, int rounding) {
   return VP8ClipUV(v, rounding);
 }
 
+// has_alpha is true if there is an alpha value that is not 0xff.
 extern void (*WebPImportYUVAFromRGBA)(
     const uint8_t* r_ptr, const uint8_t* g_ptr, const uint8_t* b_ptr,
     const uint8_t* a_ptr,

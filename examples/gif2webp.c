@@ -28,22 +28,12 @@
 #endif
 
 #include <gif_lib.h>
-<<<<<<< HEAD
-#include "webp/encode.h"
-#include "webp/mux.h"
-||||||| 5225592f
-#include "sharpyuv/sharpyuv.h"
-#include "webp/encode.h"
-#include "webp/mux.h"
-=======
 
->>>>>>> main
-#include "../examples/example_util.h"
 #include "../imageio/imageio_util.h"
+#include "./example_util.h"
 #include "./gifdec.h"
 #include "./unicode.h"
 #include "./unicode_gif.h"
-#include "sharpyuv/sharpyuv.h"
 #include "webp/encode.h"
 #include "webp/mux.h"
 
@@ -77,53 +67,14 @@ static void Help(void) {
   printf(" gif2webp [options] gif_file -o webp_file\n");
   printf("Options:\n");
   printf("  -h / -help ............. this help\n");
-<<<<<<< HEAD
-  printf("  -near_lossless <int> ... use near-lossless image preprocessing\n"
-         "                           (0..100=off), default=100\n");
-||||||| 5225592f
-  printf("  -lossy ................. encode image using lossy compression\n");
-  printf("  -mixed ................. for each frame in the image, pick lossy\n"
-         "                           or lossless compression heuristically\n");
-  printf("  -near_lossless <int> ... use near-lossless image preprocessing\n"
-         "                           (0..100=off), default=100\n");
-  printf("  -sharp_yuv ............. use sharper (and slower) RGB->YUV "
-                                    "conversion\n"
-         "                           (lossy only)\n");
-=======
-  printf("  -lossy ................. encode image using lossy compression\n");
-  printf(
-      "  -mixed ................. for each frame in the image, pick lossy\n"
-      "                           or lossless compression heuristically\n");
   printf(
       "  -near_lossless <int> ... use near-lossless image preprocessing\n"
       "                           (0..100=off), default=100\n");
-  printf(
-      "  -sharp_yuv ............. use sharper (and slower) RGB->YUV "
-      "conversion\n"
-      "                           (lossy only)\n");
->>>>>>> main
   printf("  -q <float> ............. quality factor (0:small..100:big)\n");
-<<<<<<< HEAD
-  printf("  -m <int> ............... compression method (0=fast, 6=slowest), "
-         "default=4\n");
-  printf("  -min_size .............. minimize output size (default:off)\n");
-||||||| 5225592f
-  printf("  -m <int> ............... compression method (0=fast, 6=slowest), "
-         "default=4\n");
-  printf("  -min_size .............. minimize output size (default:off)\n"
-         "                           lossless compression by default; can be\n"
-         "                           combined with -q, -m, -lossy or -mixed\n"
-         "                           options\n");
-=======
   printf(
       "  -m <int> ............... compression method (0=fast, 6=slowest), "
       "default=4\n");
-  printf(
-      "  -min_size .............. minimize output size (default:off)\n"
-      "                           lossless compression by default; can be\n"
-      "                           combined with -q, -m, -lossy or -mixed\n"
-      "                           options\n");
->>>>>>> main
+  printf("  -min_size .............. minimize output size (default:off)\n");
   printf("  -kmin <int> ............ min distance between key frames\n");
   printf("  -kmax <int> ............ max distance between key frames\n");
   printf("  -metadata <string> ..... comma separated list of metadata to\n");
