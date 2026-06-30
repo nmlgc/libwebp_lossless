@@ -311,7 +311,6 @@ static ParseStatus NewFrame(const MemBuffer* const mem, uint32_t min_size,
 static ParseStatus ParseAnimationFrame(WebPDemuxer* const dmux,
                                        uint32_t frame_chunk_size) {
   const int is_animation = !!(dmux->feature_flags & ANIMATION_FLAG);
-  const uint32_t anmf_payload_size = frame_chunk_size - ANMF_CHUNK_SIZE;
   int added_frame = 0;
   int bits;
   MemBuffer* const mem = &dmux->mem;
@@ -337,9 +336,13 @@ static ParseStatus ParseAnimationFrame(WebPDemuxer* const dmux,
   // Store a frame only if the animation flag is set there is some data for
   // this frame is available.
   start_offset = mem->start;
-  status = StoreFrame(dmux->num_frames + 1, anmf_payload_size, mem, frame);
-  if (status != PARSE_ERROR && mem->start - start_offset > anmf_payload_size) {
-    status = PARSE_ERROR;
+  {
+    const uint32_t anmf_payload_size = frame_chunk_size - ANMF_CHUNK_SIZE;
+    status = StoreFrame(dmux->num_frames + 1, anmf_payload_size, mem, frame);
+    if (status != PARSE_ERROR &&
+        mem->start - start_offset > anmf_payload_size) {
+      status = PARSE_ERROR;
+    }
   }
   if (status != PARSE_ERROR && is_animation && frame->frame_num > 0) {
     added_frame = AddFrame(dmux, frame);

@@ -529,6 +529,12 @@ if(WEBP_BUILD_CWEBP)
   set_target_properties(cwebp PROPERTIES OUTPUT_NAME "cwebp_lossless")
   target_link_libraries(cwebp exampleutil imagedec webp)
   target_include_directories(cwebp PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src)
+
+  # Required for `extras/extras.c` to keep finding headers under `src/` without
+  # sharpyuv.
+  target_include_directories(cwebp PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+
   install(TARGETS cwebp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
@@ -627,6 +633,11 @@ if(WEBP_BUILD_EXTRAS)
 
   # libextras
   add_library(extras STATIC ${WEBP_EXTRAS_SRCS})
+
+  # Required to compile `extras/extras.c` without the indirect include paths
+  # from sharpyuv.
+  target_include_directories(extras PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
   target_link_libraries(extras PUBLIC webp PRIVATE webpdspdecode)
 
   # get_disto
@@ -721,12 +732,24 @@ if(WEBP_BUILD_WEBP_JS)
 endif()
 
 if(WEBP_BUILD_ANIM_UTILS)
+  # anim_util
+  parse_makefile_am(${CMAKE_CURRENT_SOURCE_DIR}/examples "ANIM_UTIL_SRCS"
+                    "anim_util_[^ ]*")
+  add_library(anim_util STATIC ${ANIM_UTIL_SRCS})
+  target_include_directories(
+    anim_util
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}/src>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  target_link_libraries(anim_util PUBLIC webp GIF::GIF)
+
   # anim_diff
   parse_makefile_am(${CMAKE_CURRENT_SOURCE_DIR}/examples "ANIM_DIFF_SRCS"
                     "anim_diff")
   add_executable(anim_diff ${ANIM_DIFF_SRCS})
   target_link_libraries(
     anim_diff
+    anim_util
     exampleutil
     imagedec
     imageenc
@@ -742,6 +765,7 @@ if(WEBP_BUILD_ANIM_UTILS)
   add_executable(anim_dump ${ANIM_DUMP_SRCS})
   target_link_libraries(
     anim_dump
+    anim_util
     exampleutil
     imagedec
     imageenc

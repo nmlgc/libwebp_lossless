@@ -108,7 +108,10 @@ WEBP_NODISCARD WEBP_EXTERN uint8_t* WebPDecodeYUV(
 // Otherwise, output_buffer is returned, for convenience.
 // The parameter 'output_stride' specifies the distance (in bytes)
 // between scanlines. Hence, output_buffer_size is expected to be at least
-// output_stride x picture-height.
+// output_stride x picture-height. A negative stride can be used to flip
+// the image vertically. In this case, the 'output_buffer' should point to
+// the start of the last row of the allocated buffer, and 'output_buffer_size'
+// should be at least abs(output_stride) x picture-height.
 WEBP_NODISCARD WEBP_EXTERN uint8_t* WebPDecodeRGBAInto(
     const uint8_t* WEBP_COUNTED_BY(data_size) data, size_t data_size,
     uint8_t* WEBP_COUNTED_BY(output_buffer_size) output_buffer,
@@ -140,6 +143,11 @@ WEBP_NODISCARD WEBP_EXTERN uint8_t* WebPDecodeBGRInto(
 // 'u_size' and 'v_size' respectively.
 // Pointer to the luma plane ('*luma') is returned or NULL if an error occurred
 // during decoding (or because some buffers were found to be too small).
+// Strides can be negative to flip the planes vertically. In this case, the
+// pointers ('luma', 'u', 'v') should point to the start of the last row of
+// the respective buffers. The sizes should be at least abs(luma_stride) x
+// height for the luma plane, and abs(u_stride) x ((height + 1) / 2) and
+// abs(v_stride) x ((height + 1) / 2) for the chroma planes.
 WEBP_NODISCARD WEBP_EXTERN uint8_t* WebPDecodeYUVInto(
     const uint8_t* WEBP_COUNTED_BY(data_size) data, size_t data_size,
     uint8_t* WEBP_COUNTED_BY(luma_size) luma, size_t luma_size, int luma_stride,
@@ -219,7 +227,7 @@ struct WebPYUVABuffer {    // view as YUVA
 struct WebPDecBuffer {
   WEBP_CSP_MODE colorspace;  // Colorspace.
   int width, height;         // Dimensions.
-  int is_external_memory;    // If non-zero, 'internal_memory' pointer is not
+  int is_external_memory;    // If non-zero, 'private_memory' pointer is not
                              // used. If value is '2' or more, the external
                              // memory is considered 'slow' and multiple
                              // read/write will be avoided.

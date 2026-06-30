@@ -16,6 +16,7 @@
 #include <limits.h>
 #include <string.h>
 
+#include "src/dsp/dsp.h"
 #include "webp/encode.h"
 #include "webp/format_constants.h"
 #include "webp/types.h"
