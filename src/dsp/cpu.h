@@ -165,6 +165,15 @@ static WEBP_INLINE int _mm256_cvtsi256_si32(__m256i a) {
 #define WEBP_USE_MSA
 #endif
 
+#if (defined(__VSX__) && defined(__powerpc64__)) && \
+    (!defined(HAVE_CONFIG_H) || defined(WEBP_HAVE_VSX))
+#define WEBP_USE_VSX
+#endif
+
+#if defined(WEBP_USE_VSX) && !defined(WEBP_HAVE_VSX)
+#define WEBP_HAVE_VSX
+#endif
+
 //------------------------------------------------------------------------------
 
 #ifndef WEBP_DSP_OMIT_C_CODE
@@ -313,7 +322,8 @@ typedef enum {
   kNEON,
   kMIPS32,
   kMIPSdspR2,
-  kMSA
+  kMSA,
+  kVSX
 } CPUFeature;
 
 // returns true if the CPU supports the feature.

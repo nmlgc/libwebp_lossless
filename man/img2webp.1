@@ -1,5 +1,5 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH IMG2WEBP 1 "November 26, 2024"
+.TH IMG2WEBP 1 "August 24, 2026"
 .SH NAME
 img2webp \- create animated WebP file from a sequence of input images.
 .SH SYNOPSIS
@@ -14,7 +14,7 @@ This manual page documents the
 command.
 .PP
 \fBimg2webp\fP compresses a sequence of images using the animated WebP format.
-Input images can either be PNG, JPEG, TIFF or WebP.
+Input images can either be PNG, JPEG, PNM, TIFF or WebP.
 If a single file name (not starting with the character '\-') is supplied as
 the argument, the command line arguments are actually tokenized from this file.
 This allows for easy scripting or using a large number of arguments.
@@ -36,13 +36,13 @@ lossless compression by default, but can be combined with \-q, \-m, \-lossy or
 .BI \-kmax " int
 Specify the minimum and maximum distance between consecutive key frames
 (independently decodable frames) in the output animation. The tool will insert
-some key frames into the output animation as needed so that this criteria is
+some key frames into the output animation as needed so that this criterion is
 satisfied.
-.br
+.TP
 .B \-mixed
 Mixed compression mode: optimize compression of the image by picking either
 lossy or lossless compression for each frame heuristically. This global
-option disables the local option \fB-lossy\fP and \fB-lossless\fP .
+option disables the local options \fB-lossy\fP and \fB-lossless\fP.
 .TP
 .BI \-near_lossless " int
 Specify the level of near\-lossless image preprocessing. This option adjusts
@@ -71,7 +71,7 @@ command line. They can be modified any number of times preceding each particular
 input image.
 .TP
 .BI \-d " int
-Specify the image duration in milliseconds.
+Specify the image duration in milliseconds. The default is 100.
 .TP
 .B \-lossless, \-lossy
 Compress the next image(s) using lossless or lossy compression mode. The

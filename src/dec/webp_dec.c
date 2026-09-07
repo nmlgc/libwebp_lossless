@@ -250,6 +250,7 @@ static VP8StatusCode ParseVP8Header(const uint8_t* WEBP_COUNTED_BY(*data_size) *
   assert(data_size != NULL);
   assert(chunk_size != NULL);
   assert(is_lossless != NULL);
+  assert(local_data_size >= TAG_SIZE);  // what the two memcmp() above need
 
   if (*data_size < CHUNK_HEADER_SIZE) {
     return VP8_STATUS_NOT_ENOUGH_DATA;  // Insufficient data.
@@ -513,7 +514,8 @@ WEBP_NODISCARD static VP8StatusCode DecodeInto(
             VP8GetThreadMethod(params->options, &headers, io.width, io.height);
         VP8InitDithering(params->options, dec);
         if (!VP8Decode(dec, &io)) {
-          status = dec->status;
+          status =
+              (params->status != VP8_STATUS_OK) ? params->status : dec->status;
         }
       }
     }

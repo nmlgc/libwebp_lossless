@@ -288,6 +288,33 @@ AS_IF([test "x$enable_neon" != "xno"], [
   esac
   AC_SUBST([NEON_FLAGS])])
 
+AC_ARG_ENABLE([vsx],
+              AS_HELP_STRING([--disable-vsx],
+                             [Disable detection of VSX support
+                              @<:@default=auto@:>@]))
+
+AS_IF([test "x$enable_vsx" != "xno"], [
+  case "$host_cpu" in
+    powerpc64*|ppc64*)
+      VSX_FLAGS="$INTRINSICS_CFLAGS $VSX_FLAGS"
+      TEST_AND_ADD_CFLAGS([VSX_FLAGS], [-mvsx])
+      AS_IF([test -n "$VSX_FLAGS"], [
+        SAVED_CFLAGS=$CFLAGS
+        CFLAGS="$CFLAGS $VSX_FLAGS"
+        AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+          #include <altivec.h>
+          int main(void) {
+            vector signed int v = vec_splat_s32(0);
+            (void)v;
+            return 0;
+          }])],
+          [AC_DEFINE(WEBP_HAVE_VSX, [1], [Set to 1 if VSX is supported])],
+          [VSX_FLAGS=""])
+        CFLAGS=$SAVED_CFLAGS])
+      AC_SUBST([VSX_FLAGS])
+      ;;
+  esac])
+
 dnl === CLEAR_LIBVARS([var_pfx])
 dnl ===   Clears <var_pfx>_{INCLUDES,LIBS}.
 AC_DEFUN([CLEAR_LIBVARS], [$1_INCLUDES=""; $1_LIBS=""])

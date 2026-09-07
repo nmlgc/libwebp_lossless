@@ -1,5 +1,5 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH GIF2WEBP 1 "November 4, 2024"
+.TH GIF2WEBP 1 "August 24, 2026"
 .SH NAME
 gif2webp \- Convert a GIF image to WebP
 .SH SYNOPSIS
@@ -35,8 +35,9 @@ Print the version number (as major.minor.revision) and exit.
 .BI \-near_lossless " int
 Specify the level of near\-lossless image preprocessing. This option adjusts
 pixel values to help compressibility, but has minimal impact on the visual
-quality. It triggers lossless compression mode automatically. The range is 0
-(maximum preprocessing) to 100 (no preprocessing, the default). The typical
+quality. It has no effect when combined with \-lossy, since near\-lossless
+preprocessing only applies to lossless compression (the default). The range is
+0 (maximum preprocessing) to 100 (no preprocessing, the default). The typical
 value is around 60. Note that lossy with \fB\-q 100\fP can at times yield
 better results.
 .TP
@@ -53,10 +54,10 @@ trade off between encoding speed and the compressed file size and quality.
 Possible values range from 0 to 6. Default value is 4.
 When higher values are used, the encoder will spend more time inspecting
 additional encoding possibilities and decide on the quality gain.
-Lower value can result is faster processing time at the expense of
+Lower value can result in faster processing time at the expense of
 larger file size and lower compression quality.
 .TP
-.BI \-min_size
+.B \-min_size
 Encode image to achieve smallest size. This disables key frame insertion and
 picks the dispose method resulting in the smallest output for each frame. It
 uses lossless compression by default, but can be combined with \-q, \-m,
@@ -67,7 +68,7 @@ uses lossless compression by default, but can be combined with \-q, \-m,
 .BI \-kmax " int
 Specify the minimum and maximum distance between consecutive key frames
 (independently decodable frames) in the output animation. The tool will insert
-some key frames into the output animation as needed so that this criteria is
+some key frames into the output animation as needed so that this criterion is
 satisfied.
 .br
 A 'kmax' value of 0 will turn off insertion of key frames. A 'kmax' value of 1
@@ -76,11 +77,11 @@ account in both these special cases.
 Typical values are in the range 3 to 30. Default values are kmin = 9,
 kmax = 17 for lossless compression and kmin = 3, kmax = 5 for lossy compression.
 .br
-These two options are relevant only for animated images with large number of
-frames (>50).
+These two options are relevant only for animated images with a large number
+of frames (>50).
 .br
 When lower values are used, more frames will be converted to key frames. This
-may lead to smaller number of frames required to decode a frame on average,
+may lead to a smaller number of frames required to decode a frame on average,
 thereby improving the decoding performance. But this may lead to slightly bigger
 file sizes.
 Higher values may lead to worse decoding performance, but smaller file sizes.

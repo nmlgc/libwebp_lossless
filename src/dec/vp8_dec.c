@@ -147,7 +147,7 @@ int VP8GetInfo(const uint8_t* WEBP_COUNTED_BY(data_size) data, size_t data_size,
       return 0;                         // inconsistent size information.
     }
     if (w == 0 || h == 0) {
-      return 0;  // We don't support both width and height to be zero.
+      return 0;  // We don't support a zero width or height.
     }
 
     if (width) {
@@ -682,7 +682,10 @@ static int ParseFrame(VP8Decoder* const dec, VP8Io* io) {
     }
   }
   if (dec->mt_method > 0) {
-    if (!WebPGetWorkerInterface()->Sync(&dec->worker)) return 0;
+    // Collect the last row's put(), which may have aborted.
+    if (!WebPGetWorkerInterface()->Sync(&dec->worker)) {
+      return VP8SetError(dec, VP8_STATUS_USER_ABORT, "Output aborted.");
+    }
   }
 
   return 1;

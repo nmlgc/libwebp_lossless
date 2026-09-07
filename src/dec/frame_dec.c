@@ -566,6 +566,7 @@ int VP8ProcessRow(VP8Decoder* const dec, VP8Io* const io) {
 VP8StatusCode VP8EnterCritical(VP8Decoder* const dec, VP8Io* const io) {
   // Call setup() first. This may trigger additional decoding features on 'io'.
   // Note: Afterward, we must call teardown() no matter what.
+  // A more precise reason is reported in WebPDecParams::status.
   if (io->setup != NULL && !io->setup(io)) {
     VP8SetError(dec, VP8_STATUS_INVALID_PARAM, "Frame setup failed");
     return dec->status;
@@ -619,6 +620,7 @@ int VP8ExitCritical(VP8Decoder* const dec, VP8Io* const io) {
   int ok = 1;
   if (dec->mt_method > 0) {
     ok = WebPGetWorkerInterface()->Sync(&dec->worker);
+    if (!ok) VP8SetError(dec, VP8_STATUS_USER_ABORT, "Output aborted.");
   }
 
   if (io->teardown != NULL) {
@@ -710,9 +712,10 @@ static int AllocateMemory(VP8Decoder* const dec) {
   const size_t yuv_size = YUV_SIZE * sizeof(*dec->yuv_b);
   const size_t mb_data_size =
       (dec->mt_method == 2 ? 2 : 1) * mb_w * sizeof(*dec->mb_data);
+  const int cache_y_stride = 16 * mb_w;
   const size_t cache_height =
       (16 * num_caches + kFilterExtraRows[dec->filter_type]) * 3 / 2;
-  const size_t cache_size = top_size * cache_height;
+  const size_t cache_size = (size_t)cache_y_stride * cache_height;
   // alpha_size is the only one that scales as width x height.
   const uint64_t alpha_size =
       (dec->alpha_data != NULL)
@@ -723,7 +726,10 @@ static int AllocateMemory(VP8Decoder* const dec) {
                           cache_size + alpha_size + WEBP_ALIGN_CST;
   uint8_t* mem;
 
-  if (!CheckSizeOverflow(needed)) return 0;  // check for overflow
+  if (!CheckSizeOverflow(needed)) {
+    return VP8SetError(dec, VP8_STATUS_OUT_OF_MEMORY,
+                       "frame memory size overflow.");
+  }
   if (needed > dec->mem_size) {
     WebPSafeFree(dec->mem);
     dec->mem_size = 0;
@@ -769,7 +775,7 @@ static int AllocateMemory(VP8Decoder* const dec) {
   }
   mem += mb_data_size;
 
-  dec->cache_y_stride = 16 * mb_w;
+  dec->cache_y_stride = cache_y_stride;
   dec->cache_uv_stride = 8 * mb_w;
   {
     const int extra_rows = kFilterExtraRows[dec->filter_type];

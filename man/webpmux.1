@@ -1,5 +1,5 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH WEBPMUX 1 "July 18, 2024"
+.TH WEBPMUX 1 "August 24, 2026"
 .SH NAME
 webpmux \- create animated WebP files from non\-animated WebP images, extract
 frames from animated WebP images, and manage XMP/EXIF metadata and ICC profile.
@@ -36,7 +36,7 @@ frames from animated WebP images, and manage XMP/EXIF metadata and ICC profile.
 .RE
 .br
 .B webpmux \-duration
-.I DURATION OPTIONS
+.I DURATION_OPTIONS
 .B [ \-duration ... ]
 .I INPUT
 .B \-o
@@ -61,7 +61,7 @@ If a single file name (not starting with the character '\-') is supplied as
 the argument, the command line arguments are actually tokenized from this file.
 This allows for easy scripting or using a large number of arguments.
 .SH OPTIONS
-.SS GET_OPTIONS (\-get):
+.SS GET_OPTIONS (\-get)
 .TP
 .B icc
 Get ICC profile.
@@ -85,7 +85,7 @@ Where: 'loop_count' must be in range [0, 65535].
 .BI bgcolor " A,R,G,B
 Set the background color of the canvas on an animated file.
 .P
-where: 'A', 'R', 'G' and 'B' are integers in the range 0 to 255 specifying the
+Where: 'A', 'R', 'G' and 'B' are integers in the range 0 to 255 specifying the
 Alpha, Red, Green and Blue component values respectively.
 .TP
 .BI icc " file.icc
@@ -170,7 +170,7 @@ Valid range is 0 to 65535 [Default: 0 (infinite)].
 .BI \-bgcolor " A,R,G,B
 Background color of the canvas.
 .br
-where: 'A', 'R', 'G' and 'B' are integers in the range 0 to 255 specifying the
+Where: 'A', 'R', 'G' and 'B' are integers in the range 0 to 255 specifying the
 Alpha, Red, Green and Blue component values respectively
 [Default: 255,255,255,255].
 

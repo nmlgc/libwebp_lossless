@@ -1,5 +1,5 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH DWEBP 1 "July 18, 2024"
+.TH DWEBP 1 "August 24, 2026"
 .SH NAME
 dwebp \- decompress a WebP file to an image file
 .SH SYNOPSIS
@@ -11,12 +11,12 @@ This manual page documents the
 .B dwebp
 command.
 .PP
-\fBdwebp\fP decompresses WebP files into PNG, PAM, PPM or PGM images.
+\fBdwebp\fP decompresses WebP files into PNG, PAM, PPM, PGM, BMP or TIFF images.
 Note: Animated WebP files are not supported.
 .SH OPTIONS
 The basic options are:
 .TP
-.B \-h
+.B \-h, \-help
 Print usage summary.
 .TP
 .B \-version
@@ -55,6 +55,10 @@ luma/chroma-U/chroma-V samples instead of RGB, saved sequentially as
 individual planes. This option is mainly for verification and debugging
 purposes.
 .TP
+.B \-alpha
+Save only the alpha plane, as a grayscale PGM file. Requires the input
+picture to have transparency.
+.TP
 .B \-nofancy
 Don't use the fancy upscaler for YUV420. This may lead to jaggy
 edges (especially the red ones), but should be faster.
@@ -69,7 +73,7 @@ Specify a dithering \fBstrength\fP between 0 and 100. Dithering is a
 post-processing effect applied to chroma components in lossy compression.
 It helps by smoothing gradients and avoiding banding artifacts.
 .TP
-.BI \-alpha_dither
+.B \-alpha_dither
 If the compressed file contains a transparency plane that was quantized
 during compression, this flag will allow dithering the reconstructed plane
 in order to generate smoother transparency gradients.
@@ -93,11 +97,14 @@ Flip decoded image vertically (can be useful for OpenGL textures for instance).
 .TP
 \fB\-resize\fR, \fB\-scale\fI width height\fR
 Rescale the decoded picture to dimension \fBwidth\fP x \fBheight\fP. This
-option is mostly intended to reducing the memory needed to decode large images,
+option is mostly intended to reduce the memory needed to decode large images,
 when only a small version is needed (thumbnail, preview, etc.). Note: scaling
 is applied \fIafter\fP cropping.
 If either (but not both) of the \fBwidth\fP or \fBheight\fP parameters is 0,
 the value will be calculated preserving the aspect-ratio.
+.TP
+.B \-incremental
+Use incremental decoding. This is mainly useful for testing purposes.
 .TP
 .B \-quiet
 Do not print anything.

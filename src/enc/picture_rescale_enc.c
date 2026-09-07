@@ -12,6 +12,7 @@
 // Author: Skal (pascal.massimino@gmail.com)
 
 #include <assert.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 #include "src/dsp/dsp.h"
@@ -53,8 +54,8 @@ static int AdjustAndCheckRectangle(const WebPPicture* const pic,
   SnapTopLeftPosition(pic, left, top);
   if ((*left) < 0 || (*top) < 0) return 0;
   if (width <= 0 || height <= 0) return 0;
-  if ((*left) + width > pic->width) return 0;
-  if ((*top) + height > pic->height) return 0;
+  if (width > pic->width || width > pic->width - (*left)) return 0;
+  if (height > pic->height || height > pic->height - (*top)) return 0;
   return 1;
 }
 
@@ -181,8 +182,8 @@ static int RescalePlane(const uint8_t* src, int src_width, int src_height,
     return 0;
   }
   while (y < src_height) {
-    y += WebPRescalerImport(&rescaler, src_height - y, src + y * src_stride,
-                            src_stride);
+    y += WebPRescalerImport(&rescaler, src_height - y,
+                            src + (ptrdiff_t)y * src_stride, src_stride);
     WebPRescalerExport(&rescaler);
   }
   return 1;
@@ -256,7 +257,7 @@ int WebPPictureRescale(WebPPicture* picture, int width, int height) {
   } else {
     work = (rescaler_t*)WebPSafeMalloc(2ULL * width * 4, sizeof(*work));
     if (work == NULL) {
-      status = VP8_ENC_ERROR_BAD_DIMENSION;
+      status = VP8_ENC_ERROR_OUT_OF_MEMORY;
       goto Cleanup;
     }
     // In order to correctly interpolate colors, we need to apply the alpha

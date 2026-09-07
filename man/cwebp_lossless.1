@@ -1,5 +1,5 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH CWEBP_LOSSLESS 1 "September 17, 2024"
+.TH CWEBP_LOSSLESS 1 "August 24, 2026"
 .SH NAME
 cwebp_lossless \- compress an image file to a WebP file
 .SH SYNOPSIS
@@ -12,7 +12,8 @@ This manual page documents the
 command.
 .PP
 \fBcwebp_lossless\fP compresses an image using the WebP format.
-Input format can be either PNG, JPEG, TIFF, WebP or raw Y'CbCr samples.
+Input format can be either PNG, JPEG, TIFF, WebP, PNM (PGM, PPM, PAM) or raw
+Y'CbCr samples.
 Note: Animated PNG and WebP files are not supported.
 .SH OPTIONS
 The basic options are:
@@ -41,15 +42,11 @@ Specify the level of near\-lossless image preprocessing. This option adjusts
 pixel values to help compressibility, but has minimal impact on the visual
 quality. It triggers lossless compression mode automatically. The range is 0
 (maximum preprocessing) to 100 (no preprocessing, the default). The typical
-value is around 60. Note that lossy with \fB\-q 100\fP can at times yield
-better results.
+value is around 60.
 .TP
 .BI \-q " float
 Specify the compression factor for RGB channels between 0 and 100. The default
 is 75.
-.br
-In case of lossy compression (default), a small factor produces a smaller file
-with lower quality. Best quality is achieved by using a value of 100.
 .br
 In case of lossless compression (specified by the \fB\-lossless\fP option), a
 small factor enables faster compression speed, but produces a larger file.
@@ -60,12 +57,12 @@ Switch on \fBlossless\fP compression mode with the specified level between 0
 and 9, with level 0 being the fastest, 9 being the slowest. Fast mode
 produces larger file size than slower ones. A good default is \fB\-z 6\fP.
 This option is actually a shortcut for some predefined settings for quality
-and method. If options \fB\-q\fP  or \fB\-m\fP are subsequently used, they will
+and method. If options \fB\-q\fP or \fB\-m\fP are subsequently used, they will
 invalidate the effect of this option.
 .TP
 .BI \-preset " string
 Specify a set of pre\-defined parameters to suit a particular type of
-source material. Possible values are:  \fBdefault\fP, \fBphoto\fP,
+source material. Possible values are: \fBdefault\fP, \fBphoto\fP,
 \fBpicture\fP, \fBdrawing\fP, \fBicon\fP, \fBtext\fP. Since
 \fB\-preset\fP overwrites the other parameters' values (except the
 \fB\-q\fP one), this option should preferably appear first in the
@@ -91,6 +88,14 @@ Resize the source to a rectangle with size \fBwidth\fP x \fBheight\fP.
 If either (but not both) of the \fBwidth\fP or \fBheight\fP parameters is 0,
 the value will be calculated preserving the aspect\-ratio. Note: scaling
 is applied \fIafter\fP cropping.
+.TP
+.BI \-resize_mode " string
+Specify the behavior of the \fB\-resize\fP option. Possible values are:
+\fBdown_only\fP, \fBup_only\fP, \fBalways\fP (default). \fBdown_only\fP will
+use the values specified by \fB\-resize\fP if \fIeither\fP the input width or
+height are larger than the given dimensions. Similarly, \fBup_only\fP will only
+resize if \fIeither\fP the input width or height are smaller than the given
+dimensions.
 .TP
 .B \-mt
 Use multi\-threading for encoding, if possible.
@@ -123,10 +128,23 @@ Only print brief information (output file size and PSNR) for testing purposes.
 .TP
 .BI \-map " int
 Output additional ASCII\-map of encoding information. Possible map values
-range from 1 to 6. This is only meant to help debugging.
+range from 1 to 7. This is only meant to help debugging.
 
 .SS ADDITIONAL OPTIONS
 More advanced options are:
+.TP
+.BI \-s " width height
+Specify that the input file actually consists of raw Y'CbCr samples following
+the ITU\-R BT.601 recommendation, in 4:2:0 linear format.
+The luma plane has size \fBwidth\fP x \fBheight\fP.
+.TP
+.BI \-alpha_filter " string
+Specify the predictive filtering method for the alpha plane. One of 'none',
+\&'fast' or 'best', in increasing complexity and slowness order. Default is
+\&'fast'. Internally, alpha filtering is performed using four possible
+predictions (none, horizontal, vertical, gradient). The 'best' mode will try
+each mode in turn and pick the one which gives the smaller size. The 'fast'
+mode will just try to form an a priori guess without testing all modes.
 .TP
 .BI \-alpha_method " int
 Specify the algorithm used for alpha compression: 0 or 1. Algorithm 0 denotes
@@ -167,11 +185,11 @@ If an error occurs, \fBcwebp_lossless\fP exits with the value of the C constant
 \fBEXIT_FAILURE\fP. This is usually one.
 
 .SH EXAMPLES
-cweb_lossless p \-q 50 picture.png \-o picture_lossless.webp
+fBcwebp_lossless \-q 50 picture.png \-o picture_lossless.webp
 .br
-cwebp_lossless \-q 70 picture_with_alpha.png \-o picture_with_alpha.webp
+fBcwebp_lossless \-q 70 picture_with_alpha.png \-o picture_with_alpha.webp
 .br
-cwebp_lossless \-o picture.webp \-\- \-\-\-picture.png
+fBcwebp_lossless \-o picture.webp \-\- \-\-\-picture.png
 
 .SH AUTHORS
 \fBcwebp_lossless\fP is a part of libwebp and was written by the WebP team.
